@@ -214,7 +214,7 @@ create policy if not exists "users create views"
 on public.creation_views for insert
 with check (
   auth.uid() is not null
-  and (viewer_id is null or viewer_id = auth.uid())
+  and viewer_id = auth.uid()
 );
 
 -- Recount helper

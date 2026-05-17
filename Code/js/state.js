@@ -163,10 +163,15 @@
         const color = normalizeHexColor(grid[y][x]);
         if (!indexMap.has(color)) {
           if (palette.length >= GRID_SYMBOLS.length) {
+            const safeSize = Math.max(1, Math.floor(size));
             return {
-              s: size,
+              s: safeSize,
               f: 1,
-              r: grid.map((row) => Array.isArray(row) ? row.map(normalizeHexColor) : Array(size).fill("#ffffff"))
+              r: grid.map((row) => (
+                Array.isArray(row)
+                  ? row.slice(0, safeSize).map(normalizeHexColor)
+                  : Array(safeSize).fill("#ffffff")
+              ))
             };
           }
           indexMap.set(color, palette.length);

@@ -96,20 +96,18 @@
   async function verifyLocalPassword(account, password) {
     if (!account) return false;
 
-    if (account.passwordHash && account.passwordSalt) {
-      try {
-        const computed = await hashLocalPassword(
-          password,
-          account.passwordSalt,
-          Number.isFinite(account.passwordIterations) ? account.passwordIterations : PASSWORD_PBKDF2_ITERATIONS
-        );
-        return computed.passwordHash === account.passwordHash;
-      } catch {
-        return false;
-      }
-    }
+    if (!account.passwordHash || !account.passwordSalt) return false;
 
-    return typeof account.password === "string" && account.password === password;
+    try {
+      const computed = await hashLocalPassword(
+        password,
+        account.passwordSalt,
+        Number.isFinite(account.passwordIterations) ? account.passwordIterations : PASSWORD_PBKDF2_ITERATIONS
+      );
+      return computed.passwordHash === account.passwordHash;
+    } catch {
+      return false;
+    }
   }
 
   function makeLocalUser(account) {
@@ -354,21 +352,17 @@
         } else {
           const users = readAuthUsers();
           const account = users.find((item) => item.email === email.toLowerCase());
-          const valid = await verifyLocalPassword(account, password);
-          if (!account || !valid) {
+          if (!account) {
             error = { message: "Correo o contraseña incorrectos" };
+          } else if (!account.passwordHash || !account.passwordSalt) {
+            error = { message: "Cuenta local desactualizada. Crea una cuenta nueva para continuar." };
           } else {
-            if (account.password && !account.passwordHash) {
-              try {
-                const securePassword = await hashLocalPassword(password);
-                delete account.password;
-                Object.assign(account, securePassword);
-                saveAuthUsers(users);
-              } catch {
-                error = { message: "No se pudo actualizar seguridad de la cuenta local." };
-              }
+            const valid = await verifyLocalPassword(account, password);
+            if (!valid) {
+              error = { message: "Correo o contraseña incorrectos" };
+            } else {
+              data = { user: makeLocalUser(account), session: { user: makeLocalUser(account) } };
             }
-            data = { user: makeLocalUser(account), session: { user: makeLocalUser(account) } };
           }
         }
 
