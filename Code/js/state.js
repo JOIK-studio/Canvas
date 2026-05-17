@@ -3,7 +3,8 @@
   const MAX_CHARGES = 6;
   const OPEN_CANVAS_SIZE = 500;
   const OPEN_CANVAS_HISTORY_LIMIT = 30;
-  const ADMIN_EMAILS = ["jaimegamingpro@gmail.com"];
+  const OPEN_CANVAS_PAINT_SNAPSHOT_INTERVAL_MS = 15000;
+  const ADMIN_ROLES = new Set(["admin", "owner", "maintainer"]);
   const GRID_SYMBOLS = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-_";
 
   function readStoredUser() {
@@ -19,18 +20,31 @@
     return user?.user_metadata?.username || user?.email?.split("@")[0] || "Artista";
   }
 
-  function getStoredUserEmail() {
-    const user = readStoredUser();
-    return (user?.email || "").trim().toLowerCase();
+  function getAdminEmailAllowlist() {
+    const fromWindow = Array.isArray(window.CANVAS_ADMIN_EMAILS)
+      ? window.CANVAS_ADMIN_EMAILS
+      : [];
+    let fromStorage = [];
+    try {
+      const parsed = JSON.parse(localStorage.getItem("canvas_admin_emails") || "[]");
+      if (Array.isArray(parsed)) fromStorage = parsed;
+    } catch {}
+
+    return [...new Set([...fromWindow, ...fromStorage]
+      .map((item) => String(item || "").trim().toLowerCase())
+      .filter(Boolean))];
   }
 
-  function isAdminEmail(email) {
+  function isAdminEmail(user) {
+    const email = String(user?.email || "").trim().toLowerCase();
     if (!email) return false;
-    return ADMIN_EMAILS.includes(String(email).trim().toLowerCase());
+    return getAdminEmailAllowlist().includes(email);
   }
 
   function isCurrentUserAdmin() {
-    return isAdminEmail(getStoredUserEmail());
+    const user = readStoredUser();
+    const role = String(user?.app_metadata?.role || user?.role || "").trim().toLowerCase();
+    return ADMIN_ROLES.has(role) || isAdminEmail(user);
   }
 
   function nowMs() {
@@ -148,6 +162,13 @@
       for (let x = 0; x < size; x += 1) {
         const color = normalizeHexColor(grid[y][x]);
         if (!indexMap.has(color)) {
+          if (palette.length >= GRID_SYMBOLS.length) {
+            return {
+              s: size,
+              f: 1,
+              r: grid.map((row) => Array.isArray(row) ? row.map(normalizeHexColor) : Array(size).fill("#ffffff"))
+            };
+          }
           indexMap.set(color, palette.length);
           palette.push(color);
         }
@@ -160,6 +181,10 @@
   }
 
   function decodeGrid(payload) {
+    if (payload?.f === 1 && Array.isArray(payload?.r)) {
+      return payload.r.map((row) => Array.isArray(row) ? row.map(normalizeHexColor) : []);
+    }
+
     const size = Number.isFinite(payload?.s) ? payload.s : 0;
     if (!size || typeof payload?.d !== "string" || !Array.isArray(payload?.p)) return [];
     const data = payload.d;
@@ -411,22 +436,32 @@
     const user = state.user;
     const rechargeMs = user.rechargeSeconds * 1000;
     const now = nowMs();
+    let changed = false;
 
     if (user.charges >= user.maxCharges) {
-      user.lastChargeAt = now;
-      return;
+      if (user.lastChargeAt !== now) {
+        user.lastChargeAt = now;
+        changed = true;
+      }
+      return changed;
     }
 
     const elapsed = now - user.lastChargeAt;
-    if (elapsed < rechargeMs) return;
+    if (elapsed < rechargeMs) return changed;
 
     const gained = Math.floor(elapsed / rechargeMs);
+    const previousCharges = user.charges;
     user.charges = Math.min(user.maxCharges, user.charges + gained);
     user.lastChargeAt += gained * rechargeMs;
+    changed = changed || user.charges !== previousCharges;
 
     if (user.charges >= user.maxCharges) {
-      user.lastChargeAt = now;
+      if (user.lastChargeAt !== now) {
+        user.lastChargeAt = now;
+        changed = true;
+      }
     }
+    return changed;
   }
 
   function getCooldownSeconds() {
@@ -444,6 +479,16 @@
   }
 
   function pushOpenCanvasHistory(reason, actor) {
+    const last = state.openCanvas.history[state.openCanvas.history.length - 1];
+    if (
+      reason === "paint"
+      && last
+      && last.reason === "paint"
+      && (nowMs() - (Number(last.ts) || 0)) < OPEN_CANVAS_PAINT_SNAPSHOT_INTERVAL_MS
+    ) {
+      return;
+    }
+
     state.openCanvas.history.push(
       makeOpenCanvasSnapshot(reason, actor, state.openCanvas.pixels, state.openCanvas.authors)
     );
@@ -489,7 +534,8 @@
   }
 
   function consumeOpenCanvasCharge() {
-    chargeTick();
+    const charged = chargeTick();
+    if (charged) save();
     if (state.user.charges <= 0) {
       return { ok: false, reason: "no_charges" };
     }
@@ -501,7 +547,8 @@
   }
 
   function publishCreation(payload) {
-    chargeTick();
+    const charged = chargeTick();
+    if (charged) save();
     const user = state.user;
     const pixelsUsed = payload.pixelsUsed;
 
@@ -764,9 +811,9 @@
     if (!isCurrentUserAdmin()) return { ok: false, reason: "unauthorized" };
     const before = getStorageStats();
     state.openCanvas.history = (state.openCanvas.history || []).slice(-OPEN_CANVAS_HISTORY_LIMIT);
+    addEvent("Admin ejecutó compactación de base del prototipo funcional social.");
     save();
     const after = getStorageStats();
-    addEvent("Admin ejecutó compactación de base del prototipo funcional social.");
     return { ok: true, before, after };
   }
 
@@ -823,16 +870,25 @@
   }
 
   function getSocialLinks() {
+    const before = JSON.stringify(normalizeSocialLinks(state.user.socialLinks));
     syncSocialLinksFromSession();
-    save();
+    const after = JSON.stringify(normalizeSocialLinks(state.user.socialLinks));
+    if (before !== after) save();
     return clone(state.user.socialLinks);
   }
 
   function getState() {
-    chargeTick();
-    state.user.name = getStoredUserName();
+    let shouldSave = chargeTick();
+    const nextName = getStoredUserName();
+    if (state.user.name !== nextName) {
+      state.user.name = nextName;
+      shouldSave = true;
+    }
+    const beforeLinks = JSON.stringify(normalizeSocialLinks(state.user.socialLinks));
     syncSocialLinksFromSession();
-    save();
+    const afterLinks = JSON.stringify(normalizeSocialLinks(state.user.socialLinks));
+    if (beforeLinks !== afterLinks) shouldSave = true;
+    if (shouldSave) save();
     const snapshot = clone(state);
     snapshot.user.isAdmin = isCurrentUserAdmin();
     return snapshot;

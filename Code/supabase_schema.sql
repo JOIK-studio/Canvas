@@ -208,11 +208,14 @@ using (auth.uid() = user_id);
 
 create policy if not exists "users create open events"
 on public.open_canvas_events for insert
-with check (true);
+with check (auth.uid() is not null);
 
 create policy if not exists "users create views"
 on public.creation_views for insert
-with check (true);
+with check (
+  auth.uid() is not null
+  and (viewer_id is null or viewer_id = auth.uid())
+);
 
 -- Recount helper
 create or replace function public.recount_creation_stats(p_creation_id uuid)
@@ -235,7 +238,7 @@ select
   count(distinct c.id) as creation_count,
   coalesce(sum(c.like_count), 0) as total_likes,
   coalesce(sum(c.boost_count), 0) as total_boosts,
-  coalesce(sum(coalesce(jsonb_array_length(c.grid), 0)), 0) as grid_rows,
+  coalesce(sum(coalesce(char_length(c.grid->>'d'), 0)), 0) as grid_rows,
   coalesce(count(distinct cv.id), 0) as total_views
 from public.profiles p
 left join public.creations c on c.author_id = p.id

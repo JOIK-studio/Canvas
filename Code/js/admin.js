@@ -25,12 +25,13 @@
     state.creations.slice(0, 40).forEach((creation) => {
       const row = document.createElement("article");
       row.className = "admin-list-item";
-      row.innerHTML = `
-        <div>
-          <strong>${creation.title}</strong>
-          <p class="hint">${creation.author} · ${window.CanvasApp.Store.timeLabel(creation.createdAt)}</p>
-        </div>
-      `;
+      const info = document.createElement("div");
+      const title = document.createElement("strong");
+      title.textContent = creation.title;
+      const meta = document.createElement("p");
+      meta.className = "hint";
+      meta.textContent = `${creation.author} · ${window.CanvasApp.Store.timeLabel(creation.createdAt)}`;
+      info.append(title, meta);
 
       const actions = document.createElement("div");
       actions.className = "admin-inline-actions";
@@ -55,6 +56,7 @@
       });
 
       actions.append(view, del);
+      row.appendChild(info);
       row.appendChild(actions);
       root.appendChild(row);
     });

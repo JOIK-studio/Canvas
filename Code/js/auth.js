@@ -2,6 +2,9 @@
 (function () {
   const AUTH_USERS_KEY = "canvas_auth_users_v1";
   const AUTH_MODE_KEY = "canvas_auth_mode";
+  const PASSWORD_HASH_VERSION = 1;
+  const PASSWORD_PBKDF2_ITERATIONS = 120000;
+  const PASSWORD_SALT_BYTES = 16;
 
   function setupThemeToggle() {
     const button = document.getElementById("authThemeToggle");
@@ -39,6 +42,74 @@
 
   function saveAuthUsers(users) {
     localStorage.setItem(AUTH_USERS_KEY, JSON.stringify(users));
+  }
+
+  function bytesToBase64(bytes) {
+    let out = "";
+    for (let i = 0; i < bytes.length; i += 1) out += String.fromCharCode(bytes[i]);
+    return btoa(out);
+  }
+
+  function base64ToBytes(value) {
+    const raw = atob(value);
+    const out = new Uint8Array(raw.length);
+    for (let i = 0; i < raw.length; i += 1) out[i] = raw.charCodeAt(i);
+    return out;
+  }
+
+  async function hashLocalPassword(password, saltBase64, iterations = PASSWORD_PBKDF2_ITERATIONS) {
+    if (!window.crypto?.subtle) {
+      throw new Error("Tu navegador no soporta cifrado seguro para autenticación local.");
+    }
+
+    const encoder = new TextEncoder();
+    const passKey = await window.crypto.subtle.importKey(
+      "raw",
+      encoder.encode(password),
+      "PBKDF2",
+      false,
+      ["deriveBits"]
+    );
+
+    const salt = saltBase64
+      ? base64ToBytes(saltBase64)
+      : window.crypto.getRandomValues(new Uint8Array(PASSWORD_SALT_BYTES));
+    const bits = await window.crypto.subtle.deriveBits(
+      {
+        name: "PBKDF2",
+        hash: "SHA-256",
+        salt,
+        iterations
+      },
+      passKey,
+      256
+    );
+
+    return {
+      passwordHash: bytesToBase64(new Uint8Array(bits)),
+      passwordSalt: bytesToBase64(salt),
+      passwordIterations: iterations,
+      passwordVersion: PASSWORD_HASH_VERSION
+    };
+  }
+
+  async function verifyLocalPassword(account, password) {
+    if (!account) return false;
+
+    if (account.passwordHash && account.passwordSalt) {
+      try {
+        const computed = await hashLocalPassword(
+          password,
+          account.passwordSalt,
+          Number.isFinite(account.passwordIterations) ? account.passwordIterations : PASSWORD_PBKDF2_ITERATIONS
+        );
+        return computed.passwordHash === account.passwordHash;
+      } catch {
+        return false;
+      }
+    }
+
+    return typeof account.password === "string" && account.password === password;
   }
 
   function makeLocalUser(account) {
@@ -283,9 +354,20 @@
         } else {
           const users = readAuthUsers();
           const account = users.find((item) => item.email === email.toLowerCase());
-          if (!account || account.password !== password) {
+          const valid = await verifyLocalPassword(account, password);
+          if (!account || !valid) {
             error = { message: "Correo o contraseña incorrectos" };
           } else {
+            if (account.password && !account.passwordHash) {
+              try {
+                const securePassword = await hashLocalPassword(password);
+                delete account.password;
+                Object.assign(account, securePassword);
+                saveAuthUsers(users);
+              } catch {
+                error = { message: "No se pudo actualizar seguridad de la cuenta local." };
+              }
+            }
             data = { user: makeLocalUser(account), session: { user: makeLocalUser(account) } };
           }
         }
@@ -365,11 +447,12 @@
           } else if (usernameExists) {
             error = { message: "Ese nombre de usuario ya existe" };
           } else {
+            const securePassword = await hashLocalPassword(password);
             users.push({
               id: window.crypto?.randomUUID?.() || `local_${Date.now()}`,
               email: normalizedEmail,
               username,
-              password,
+              ...securePassword,
               createdAt: new Date().toISOString()
             });
             saveAuthUsers(users);
