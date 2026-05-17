@@ -816,9 +816,10 @@
     if (!isCurrentUserAdmin()) return { ok: false, reason: "unauthorized" };
     const before = getStorageStats();
     state.openCanvas.history = (state.openCanvas.history || []).slice(-OPEN_CANVAS_HISTORY_LIMIT);
-    addEvent("Admin ejecutó compactación de base del prototipo funcional social.");
     save();
     const after = getStorageStats();
+    addEvent("Admin ejecutó compactación de base del prototipo funcional social.");
+    save();
     return { ok: true, before, after };
   }
 
