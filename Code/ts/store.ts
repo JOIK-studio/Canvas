@@ -1,6 +1,6 @@
 import type { AppState } from "./types";
 
-const STORAGE_KEY = "canvas_app_state_v4";
+const STORAGE_KEY = "canvas_app_state_v3";
 
 function createDefaultState(): AppState {
   return {
