@@ -59,7 +59,7 @@
 
   async function hashLocalPassword(password, saltBase64, iterations = PASSWORD_PBKDF2_ITERATIONS) {
     if (!window.crypto?.subtle) {
-      throw new Error("Tu navegador no soporta cifrado seguro para autenticación local.");
+      throw new Error("Tu navegador no soporta cifrado seguro. Usa un navegador moderno o inicia con Supabase.");
     }
 
     const encoder = new TextEncoder();
@@ -355,7 +355,9 @@
           if (!account) {
             error = { message: "Correo o contraseña incorrectos" };
           } else if (!account.passwordHash || !account.passwordSalt) {
-            error = { message: "Cuenta local desactualizada. Crea una cuenta nueva para continuar." };
+            error = {
+              message: "Cuenta local desactualizada por mejoras de seguridad. Crea una cuenta nueva para continuar."
+            };
           } else {
             const valid = await verifyLocalPassword(account, password);
             if (!valid) {
