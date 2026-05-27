@@ -7,5 +7,5 @@
 //
 // Nota: la anon key es pública por diseño; la seguridad recae en las
 // políticas RLS configuradas en el proyecto de Supabase.
-window.CANVAS_SUPABASE_URL = "https://your-project.supabase.co";
-window.CANVAS_SUPABASE_KEY = "your-anon-public-key";
+window.CANVAS_SUPABASE_URL = "https://rzztmvdllnqmgjefsupa.supabase.co";
+window.CANVAS_SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ6enRtdmRsbG5xbWdqZWZzdXBhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcxMDA4NDQsImV4cCI6MjA5MjY3Njg0NH0.yav8FihA9SBGdhu8B2sXTjiLOlxim_TBC6UjIg3Vq-Y";
