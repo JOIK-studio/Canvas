@@ -33,9 +33,15 @@ Canvas actualmente cuenta con servidores en linea para el usuario (vinculadas co
 
 ---
 
+## Página pública
+
+Canvas está disponible en: **https://joik-studio.github.io/Canvas/**
+
+---
+
 ## Despliegue en GitHub Pages
 
-Este repositorio está preparado para publicar en GitHub Pages **sin GitHub Actions** (modo **Deploy from a branch**).
+Este repositorio está preparado para publicar en GitHub Pages usando **Deploy from a branch**.
 
 Para activarlo:
 
