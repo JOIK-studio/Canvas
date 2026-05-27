@@ -35,13 +35,14 @@ Canvas actualmente cuenta con servidores en linea para el usuario (vinculadas co
 
 ## Despliegue en GitHub Pages
 
-El repositorio incluye el workflow `.github/workflows/deploy-pages.yml`, que publica automáticamente la carpeta `Code/` en GitHub Pages cuando hay cambios en `main`.
+Este repositorio está preparado para publicar en GitHub Pages **sin GitHub Actions** (modo **Deploy from a branch**).
 
 Para activarlo:
 
 1. Ve a **Settings → Pages** en el repositorio.
-2. En **Source**, selecciona **GitHub Actions**.
-3. Haz push a `main` o ejecuta manualmente el workflow **Deploy GitHub Pages**.
+2. En **Source**, selecciona **Deploy from a branch**.
+3. Elige la rama `main` y carpeta `/ (root)`.
+4. Guarda la configuración. La raíz del repositorio redirige automáticamente a `Code/index.html`.
 
 ---
 
