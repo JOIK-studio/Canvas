@@ -41,14 +41,14 @@
 ## 7) Verificación operativa Supabase/DB: estado actual
 - **Afecta:** Integración global
 - **Evidencia de código:** Supabase se usa en auth/profile (`auth.js`, `profile.js`), pero no en la capa de datos principal (`state.js`).
-- **Evidencia de ejecución (sandbox):** intento de reachability a `https://rzztmvdllnqmgjefsupa.supabase.co` devolvió error de red del entorno (`curl` con código `000`, exit `6`), por lo que no se pudo validar conectividad real desde este runner.
+- **Evidencia de ejecución (sandbox):** intento de reachability al host Supabase configurado (`https://[PROJECT_REF].supabase.co`) devolvió error de red del entorno (`curl` con código `000`, exit `6`), por lo que no se pudo validar conectividad real desde este runner.
 - **Impacto:** No hay confirmación técnica de “BD funcionando end-to-end” para flujos productivos; actualmente sólo hay acoplamiento parcial a auth.
 - **Siguiente paso:** Ejecutar smoke tests desde entorno con salida a internet y validar flujos: signup/login/logout, create/read/update en tablas, políticas RLS y Open Canvas.
 
 ## 8) Hallazgo CI relacionado (para seguimiento)
 - **Afecta:** GitHub Actions (histórico reciente)
 - **Evidencia:**  
-  - Run `26526112005` (pages build): fallo Jekyll por `No such file or directory @ dir_chdir0 - /github/workspace/docs` durante `assets/css/style.scss`.  
+  - Run `26526112005` (pages build): falla Jekyll por `No such file or directory @ dir_chdir0 - /github/workspace/docs` durante `assets/css/style.scss`.  
   - Run `26524611145` (CodeQL): `CodeQL job status was configuration error`.
 - **Impacto:** Inestabilidad de pipeline y menor señal de calidad automática.
 - **Siguiente paso:** Revisar config de Pages/docs en workflow y ajustes de CodeQL para evitar fallos de configuración.
