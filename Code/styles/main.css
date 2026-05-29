@@ -2062,6 +2062,61 @@ body[data-page="open-canvas"] .topbar:focus-within {
   gap: 12px;
 }
 
+.landing-footer {
+  margin-top: 4rem;
+  border-top: 1px solid var(--line);
+  padding: 1.5rem 0 2rem;
+}
+
+.landing-footer-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.landing-footer-brand {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+
+.landing-footer-links {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+
+.landing-footer-links a {
+  color: var(--text-muted);
+  text-decoration: none;
+}
+
+.landing-footer-links a:hover {
+  color: var(--text);
+}
+
+.landing-economy-band {
+  padding: 22px;
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
+  gap: 16px;
+}
+
+.landing-economy-points {
+  display: grid;
+  gap: 10px;
+}
+
+.landing-economy-points p {
+  color: var(--text-muted);
+}
+
 .landing-final-cta {
   justify-content: flex-start;
 }
@@ -2078,8 +2133,55 @@ body[data-page="open-canvas"] .topbar:focus-within {
   gap: 8px;
 }
 
+.economy-number {
+  font-size: clamp(1.5rem, 3vw, 2.2rem);
+  line-height: 1;
+}
+
 .stat-card span {
   color: var(--text-muted);
+}
+
+.faq-list {
+  display: grid;
+  gap: 8px;
+}
+
+.faq-item {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: rgba(7, 15, 42, 0.34);
+  overflow: hidden;
+}
+
+:root[data-theme="light"] .faq-item {
+  background: rgba(255, 255, 255, 0.64);
+}
+
+.faq-question {
+  width: 100%;
+  border: 0;
+  padding: 12px 14px;
+  text-align: left;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.faq-answer {
+  margin: 0;
+  padding: 0 14px;
+  max-height: 0;
+  overflow: hidden;
+  color: var(--text-muted);
+  transition: max-height 260ms ease, padding 260ms ease;
+}
+
+.faq-item.is-open .faq-answer {
+  padding: 0 14px 12px;
+  max-height: 220px;
 }
 
 .app-hero {
@@ -2806,6 +2908,10 @@ body.app-loaded .app-hero .cta-row {
     grid-template-columns: 1fr 1fr;
   }
 
+  .landing-economy-band {
+    grid-template-columns: 1fr;
+  }
+
   .feature-card-wide {
     grid-column: auto;
   }
@@ -3008,5 +3114,9 @@ body.app-loaded .app-hero .cta-row {
   .landing-stat-grid,
   .landing-flow {
     grid-template-columns: 1fr;
+  }
+
+  .faq-question {
+    font-size: 0.94rem;
   }
 }

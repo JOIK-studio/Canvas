@@ -3,6 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="supabase-url" content="" />
+  <meta name="supabase-key" content="" />
   <script src="js/theme-init.js"></script>
   <script src="js/config.js"></script>
   <title>Canvas | Autenticación</title>
@@ -137,15 +139,30 @@
           </svg>
         </button>
 
+        <div class="oauth-divider" aria-hidden="true">
+          <span>o registrarte con</span>
+        </div>
+
+        <div class="oauth-grid">
+          <button id="signupGoogleBtn" class="btn-social" type="button" data-provider="google">
+            <span class="social-dot google"></span>
+            Google
+          </button>
+          <button id="signupDiscordBtn" class="btn-social" type="button" data-provider="discord">
+            <span class="social-dot discord"></span>
+            Discord
+          </button>
+        </div>
+
         <div id="signupError" class="error-msg hidden"></div>
       </form>
 
       <div class="auth-footer">
-        <p class="small">Utilizamos Supabase para tu seguridad.</p>
+        <p class="small">Tus datos viajan por HTTPS y la autenticación la gestiona Supabase.</p>
         <div class="privacy-links">
-          <a href="#">Privacidad</a>
+          <a href="privacy.html">Privacidad</a>
           <span>•</span>
-          <a href="#">Términos</a>
+          <a href="terms.html">Términos</a>
         </div>
       </div>
     </div>

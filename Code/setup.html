@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script src="js/theme-init.js"></script>
+  <title>Canvas | Setup Inicial</title>
+  <link rel="stylesheet" href="styles/main.css" />
+</head>
+<body data-page="setup">
+  <header class="topbar glass">
+    <div class="header-left">
+      <a class="brand" href="app.html">
+        <img src="images/logo.svg" alt="Canvas" class="brand-logo" />
+        Canvas
+      </a>
+    </div>
+
+    <div class="header-right">
+      <div class="user-menu">
+        <button id="userMenuBtn" class="user-btn">
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+          </svg>
+          <span id="userEmail">Usuario</span>
+        </button>
+        <div id="userDropdown" class="dropdown hidden">
+          <a href="profile.html" class="dropdown-item">Mi Perfil</a>
+          <button class="dropdown-item" onclick="logout()">Cerrar Sesión</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="glass reveal setup-shell">
+      <article class="setup-intro">
+        <p class="section-kicker">Bienvenido</p>
+        <h1>Configura tu perfil y conoce Canvas en 1 minuto</h1>
+        <p class="lead mini">Este setup inicial te deja todo listo para publicar tu primera pieza y empezar a competir por visibilidad.</p>
+
+        <ol class="setup-steps">
+          <li><strong>Editor:</strong> diseña rápido y publica sin salir del flujo.</li>
+          <li><strong>Galería:</strong> revisa likes, boosts y comentarios en tiempo real.</li>
+          <li><strong>Open Canvas:</strong> participa en el mural global píxel por píxel.</li>
+          <li><strong>Tienda:</strong> mejora cargas, velocidad y tamaño del editor.</li>
+        </ol>
+      </article>
+
+      <article class="setup-form-card">
+        <form id="setupForm" class="setup-form">
+          <div class="form-group">
+            <label for="setupDisplayName">Nombre visible</label>
+            <input id="setupDisplayName" type="text" maxlength="32" placeholder="Como te verán en Canvas" required />
+          </div>
+
+          <div class="form-group">
+            <label for="setupBio">Bio corta (opcional)</label>
+            <textarea id="setupBio" rows="4" maxlength="160" placeholder="Tu estilo, técnica o vibe creativa"></textarea>
+          </div>
+
+          <label class="setup-check">
+            <input id="setupReady" type="checkbox" required />
+            <span>Entiendo cómo funciona Canvas y quiero continuar.</span>
+          </label>
+
+          <button class="btn solid" type="submit">Entrar a la app</button>
+          <div id="setupMsg" class="mini"></div>
+        </form>
+      </article>
+    </section>
+  </main>
+
+  <script src="js/supabase-config.js"></script>
+  <script src="js/auth-check.js?v=20260502" type="module"></script>
+  <script src="js/user-menu.js"></script>
+  <script src="js/state.js" defer></script>
+  <script src="js/ui.js" defer></script>
+  <script src="js/setup.js" defer></script>
+</body>
+</html>

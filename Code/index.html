@@ -53,6 +53,7 @@
           <span class="profile-tag">Editor escalable</span>
           <span class="profile-tag">Open Canvas 500x500</span>
           <span class="profile-tag">Likes, boosts y remix</span>
+          <span class="profile-tag">Sincronización cloud</span>
         </div>
       </div>
       <div class="landing-stage">
@@ -131,31 +132,68 @@
 
     <section id="economy" class="landing-stat-grid">
       <article class="glass reveal stat-card">
-        <strong>Cargas vivas</strong>
-        <span>Gestiona ritmo y ventanas de publicación</span>
+        <strong class="economy-number" data-target="6">0</strong>
+        <span>Cargas máximas por ciclo para mantener ritmo competitivo.</span>
       </article>
       <article class="glass reveal stat-card">
-        <strong>Píxeles con coste</strong>
-        <span>Inventario real por cada pieza publicada</span>
+        <strong class="economy-number" data-target="500">0</strong>
+        <span>Tamaño del Open Canvas para impacto visual compartido.</span>
       </article>
       <article class="glass reveal stat-card">
-        <strong>Boost social</strong>
-        <span>Empuja obras para escalar visibilidad</span>
+        <strong class="economy-number" data-target="96">0</strong>
+        <span>Inventario inicial para arrancar publicando desde minuto uno.</span>
       </article>
+    </section>
+
+    <section class="landing-economy-band glass reveal" aria-label="Sistema económico">
+      <article>
+        <p class="section-kicker">Economía viva</p>
+        <h2>Publicar cuesta recursos y eso genera decisiones reales</h2>
+        <p>En Canvas no hay progreso vacío: cada publicación consume píxeles, cada boost compite por visibilidad y cada carga define tu ventana de ataque.</p>
+      </article>
+      <div class="landing-economy-points">
+        <p><strong>Tienda:</strong> compra packs para sostener producción.</p>
+        <p><strong>Boost:</strong> invierte monedas para ganar tráfico.</p>
+        <p><strong>Remix:</strong> reutiliza ideas y vuelve a entrar al feed.</p>
+      </div>
     </section>
 
     <section id="faq" class="glass reveal landing-faq">
       <div>
-        <p class="section-kicker">Acceso</p>
-        <h2>Explora primero. Entra cuando quieras competir.</h2>
+        <p class="section-kicker">FAQ</p>
+        <h2>Lo importante antes de entrar</h2>
       </div>
-      <p>La landing es pública. El editor, la galería, la tienda, el perfil y Open Canvas requieren sesión para proteger tu progreso.</p>
+      <div class="faq-list">
+        <article class="faq-item is-open">
+          <button class="faq-question" type="button" aria-expanded="true">¿Puedo entrar sin cuenta?</button>
+          <p class="faq-answer">La landing es pública. Para crear, publicar y guardar progreso necesitas sesión.</p>
+        </article>
+        <article class="faq-item">
+          <button class="faq-question" type="button" aria-expanded="false">¿Hay registro con Discord?</button>
+          <p class="faq-answer">Sí. Puedes continuar con Discord y tu cuenta se crea automáticamente en Supabase.</p>
+        </article>
+        <article class="faq-item">
+          <button class="faq-question" type="button" aria-expanded="false">¿Se guarda mi progreso?</button>
+          <p class="faq-answer">Sí. Recursos, perfil y estado de juego se sincronizan entre sesiones cuando inicias sesión.</p>
+        </article>
+      </div>
       <div class="cta-row landing-final-cta">
         <a class="btn solid" href="auth.html">Crear cuenta</a>
         <a class="btn ghost" href="auth.html">Iniciar sesión</a>
       </div>
     </section>
   </main>
+
+  <footer class="landing-footer">
+    <div class="landing-footer-inner">
+      <span class="landing-footer-brand">Canvas &copy; 2026</span>
+      <nav class="landing-footer-links" aria-label="Legal">
+        <a href="privacy.html">Privacidad</a>
+        <span aria-hidden="true">&bull;</span>
+        <a href="terms.html">Términos</a>
+      </nav>
+    </div>
+  </footer>
 
   <script src="js/ui.js" defer></script>
   <script src="js/landing.js" defer></script>

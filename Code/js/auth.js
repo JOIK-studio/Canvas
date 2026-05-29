@@ -1,6 +1,5 @@
 // Script de autenticación
 (function () {
-  const AUTH_USERS_KEY = "canvas_auth_users_v1";
   const AUTH_MODE_KEY = "canvas_auth_mode";
 
   function setupThemeToggle() {
@@ -29,32 +28,6 @@
 
   bootAuth();
 
-  function readAuthUsers() {
-    try {
-      return JSON.parse(localStorage.getItem(AUTH_USERS_KEY) || "[]");
-    } catch {
-      return [];
-    }
-  }
-
-  function saveAuthUsers(users) {
-    localStorage.setItem(AUTH_USERS_KEY, JSON.stringify(users));
-  }
-
-  function makeLocalUser(account) {
-    return {
-      id: account.id,
-      email: account.email,
-      user_metadata: {
-        username: account.username
-      },
-      app_metadata: {
-        provider: "local"
-      },
-      created_at: account.createdAt
-    };
-  }
-
   function buildPersistedUser(user) {
     if (!user || typeof user !== "object") return null;
     return {
@@ -75,6 +48,14 @@
     localStorage.setItem("canvas_user", JSON.stringify(persistedUser));
   }
 
+  function readStoredUser() {
+    try {
+      return JSON.parse(localStorage.getItem("canvas_user") || "null");
+    } catch {
+      return null;
+    }
+  }
+
   function setMode(mode) {
     localStorage.setItem(AUTH_MODE_KEY, mode);
     document.body.dataset.authMode = mode;
@@ -86,14 +67,15 @@
 
     footer.textContent = mode === "supabase"
       ? "Autenticación conectada con Supabase."
-      : "Prototipo funcional social activo: sin backend remoto.";
+      : "Falta configuración de Supabase en este entorno.";
   }
 
   function getSupabaseConfig() {
+    const fromWindow = window.CANVAS_SUPABASE_CONFIG || {};
     const urlMeta = document.querySelector('meta[name="supabase-url"]');
     const keyMeta = document.querySelector('meta[name="supabase-key"]');
-    const url = window.CANVAS_SUPABASE_URL || urlMeta?.content || localStorage.getItem("canvas_supabase_url") || "";
-    const key = window.CANVAS_SUPABASE_KEY || keyMeta?.content || localStorage.getItem("canvas_supabase_key") || "";
+    const url = window.CANVAS_SUPABASE_URL || fromWindow.url || urlMeta?.content || "";
+    const key = window.CANVAS_SUPABASE_KEY || fromWindow.key || keyMeta?.content || "";
     return { url: url.trim(), key: key.trim() };
   }
 
@@ -108,9 +90,9 @@
     }
   }
 
-  function initLocalAuth() {
-    setMode("local");
-    showModeBanner("local");
+  function initBackendRequired() {
+    setMode("remote-required");
+    showModeBanner("remote-required");
     setupSocialAuth(false);
 
     const currentUser = readStoredUser();
@@ -122,14 +104,6 @@
     setupTabs();
     setupLoginForm();
     setupSignupForm();
-  }
-
-  function readStoredUser() {
-    try {
-      return JSON.parse(localStorage.getItem("canvas_user") || "null");
-    } catch {
-      return null;
-    }
   }
 
   async function loadSupabaseClient() {
@@ -147,7 +121,7 @@
   async function bootAuth() {
     const config = getSupabaseConfig();
     if (!hasValidSupabaseConfig(config)) {
-      initLocalAuth();
+      initBackendRequired();
       return;
     }
 
@@ -155,8 +129,8 @@
       await loadSupabaseClient();
       await initAuth(config);
     } catch (error) {
-      console.warn("Fallo al iniciar Supabase; se activa el prototipo funcional social.", error);
-      initLocalAuth();
+      console.warn("Fallo al iniciar Supabase.", error);
+      initBackendRequired();
     }
   }
 
@@ -285,13 +259,7 @@
             password
           }));
         } else {
-          const users = readAuthUsers();
-          const account = users.find((item) => item.email === email.toLowerCase());
-          if (!account || account.password !== password) {
-            error = { message: "Correo o contraseña incorrectos" };
-          } else {
-            data = { user: makeLocalUser(account), session: { user: makeLocalUser(account) } };
-          }
+          error = { message: "Configura Supabase para iniciar sesión." };
         }
 
         if (error) {
@@ -359,25 +327,7 @@
             }
           }));
         } else {
-          const users = readAuthUsers();
-          const normalizedEmail = email.toLowerCase();
-          const emailExists = users.some((item) => item.email === normalizedEmail);
-          const usernameExists = users.some((item) => item.username.toLowerCase() === username.toLowerCase());
-
-          if (emailExists) {
-            error = { message: "Ese correo ya está registrado" };
-          } else if (usernameExists) {
-            error = { message: "Ese nombre de usuario ya existe" };
-          } else {
-            users.push({
-              id: window.crypto?.randomUUID?.() || `local_${Date.now()}`,
-              email: normalizedEmail,
-              username,
-              password,
-              createdAt: new Date().toISOString()
-            });
-            saveAuthUsers(users);
-          }
+          error = { message: "Configura Supabase para registrar cuentas." };
         }
 
         if (error) {
@@ -388,9 +338,7 @@
 
         showError(
           "signup",
-          document.body.dataset.authMode === "supabase"
-            ? "✓ Registrado. Verifica tu correo y luego inicia sesión."
-            : "✓ Cuenta creada. Ya puedes iniciar sesión en este dispositivo."
+          "✓ Registrado. Verifica tu correo y luego inicia sesión."
         );
         form.reset();
         submitBtn.disabled = false;
