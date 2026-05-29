@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script src="js/theme-init.js"></script>
+  <title>Canvas | Ajustes</title>
+  <link rel="stylesheet" href="styles/main.css" />
+</head>
+<body data-page="ajustes">
+  <header class="topbar glass">
+    <div class="header-left">
+      <a class="brand" href="app.html">
+        <img src="images/logo.svg" alt="Canvas" class="brand-logo" />
+        Canvas
+      </a>
+    </div>
+
+    <nav class="topnav">
+      <a href="create.html">Crear</a>
+      <a href="gallery.html">Galería</a>
+      <a href="shop.html">Tienda</a>
+      <a href="open-canvas.html">Open Canvas</a>
+      <a href="shortcuts.html">Atajos</a>
+      <a class="active" href="ajustes.html">Ajustes</a>
+    </nav>
+
+    <div class="header-right">
+      <div class="topstats">
+        <span id="coinsStat" title="Monedas">0</span>
+        <span id="pixelsStat" title="Píxeles">0</span>
+        <span id="chargesStat" title="Cargas">0</span>
+      </div>
+
+      <div class="user-menu">
+        <button id="userMenuBtn" class="user-btn">
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+          </svg>
+          <span id="userEmail">Usuario</span>
+        </button>
+        <div id="userDropdown" class="dropdown hidden">
+          <a href="profile.html" class="dropdown-item">Mi Perfil</a>
+          <a href="ajustes.html" class="dropdown-item">Ajustes</a>
+          <button class="dropdown-item" onclick="logout()">Cerrar Sesión</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="glass reveal activity-card">
+      <p class="section-kicker">Ajustes</p>
+      <h1>Configuración de Canvas</h1>
+      <p class="lead mini">Ajusta tema, gestiona tus datos de cuenta y controla tu sesión.</p>
+
+      <div class="shortcuts-grid">
+        <article>
+          <h3>Tema</h3>
+          <select id="settingsTheme" class="input">
+            <option value="dark">Oscuro</option>
+            <option value="light">Claro</option>
+          </select>
+          <div class="row">
+            <button id="settingsThemeSaveBtn" class="btn solid" type="button">Aplicar tema</button>
+          </div>
+        </article>
+
+        <article>
+          <h3>Datos de cuenta</h3>
+          <div class="row">
+            <button id="settingsExportBtn" class="btn ghost" type="button">Exportar datos</button>
+            <button id="settingsImportBtn" class="btn ghost" type="button">Importar datos</button>
+            <button id="settingsResetBtn" class="btn ghost" type="button">Reiniciar app</button>
+          </div>
+          <input id="settingsImportFile" type="file" accept="application/json" hidden />
+        </article>
+      </div>
+
+      <p id="settingsStatus" class="mini"></p>
+    </section>
+  </main>
+
+  <script src="js/auth-check.js?v=20260502" type="module"></script>
+  <script src="js/user-menu.js"></script>
+  <script src="js/state.js" defer></script>
+  <script src="js/ui.js" defer></script>
+  <script src="js/settings.js" defer></script>
+</body>
+</html>

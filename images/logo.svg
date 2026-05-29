@@ -1,0 +1,39 @@
+<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect x="6" y="6" width="52" height="52" rx="16" fill="url(#panel)"/>
+  <rect x="6.75" y="6.75" width="50.5" height="50.5" rx="15.25" stroke="url(#frame)" stroke-opacity="0.9" stroke-width="1.5"/>
+  <path d="M18 23.5H30.5V46H18V23.5Z" fill="url(#primaryGlow)"/>
+  <path d="M22.5 18H46V30.5H22.5V18Z" fill="url(#accentGlow)"/>
+  <path d="M28 28H46V46H28V28Z" fill="url(#secondaryGlow)"/>
+  <path d="M18 18H46V46" stroke="url(#grid)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect x="15" y="15" width="34" height="34" rx="8" stroke="url(#frame)" stroke-width="2.5"/>
+  <circle cx="18" cy="18" r="2.3" fill="#30b0c7"/>
+  <circle cx="46" cy="18" r="2.3" fill="#0a84ff"/>
+  <circle cx="46" cy="46" r="2.3" fill="#5e5ce6"/>
+  <defs>
+    <linearGradient id="panel" x1="10" y1="8" x2="54" y2="58" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#08133A"/>
+      <stop offset="1" stop-color="#09112B"/>
+    </linearGradient>
+    <linearGradient id="frame" x1="12" y1="10" x2="54" y2="54" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#30b0c7"/>
+      <stop offset="0.5" stop-color="#0a84ff"/>
+      <stop offset="1" stop-color="#5e5ce6"/>
+    </linearGradient>
+    <linearGradient id="grid" x1="18" y1="18" x2="46" y2="46" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#d9f7ff"/>
+      <stop offset="1" stop-color="#eef4ff" stop-opacity="0.92"/>
+    </linearGradient>
+    <linearGradient id="primaryGlow" x1="18" y1="23.5" x2="30.5" y2="46" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0a84ff" stop-opacity="0.92"/>
+      <stop offset="1" stop-color="#30b0c7" stop-opacity="0.52"/>
+    </linearGradient>
+    <linearGradient id="secondaryGlow" x1="28" y1="28" x2="46" y2="46" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#5e5ce6" stop-opacity="0.95"/>
+      <stop offset="1" stop-color="#0a84ff" stop-opacity="0.42"/>
+    </linearGradient>
+    <linearGradient id="accentGlow" x1="22.5" y1="18" x2="46" y2="30.5" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#30b0c7" stop-opacity="0.88"/>
+      <stop offset="1" stop-color="#5e5ce6" stop-opacity="0.44"/>
+    </linearGradient>
+  </defs>
+</svg>

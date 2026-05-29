@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script src="js/theme-init.js"></script>
+  <title>Canvas | Detalle de Tienda</title>
+  <link rel="stylesheet" href="styles/main.css" />
+</head>
+<body data-page="shop-item">
+  <header class="topbar glass">
+    <div class="header-left">
+      <a class="brand" href="app.html">
+        <img src="images/logo.svg" alt="Canvas" class="brand-logo" />
+        Canvas
+      </a>
+    </div>
+
+    <nav class="topnav">
+      <a href="create.html">Crear</a>
+      <a href="gallery.html">Galeria</a>
+      <a class="active" href="shop.html">Tienda</a>
+      <a href="open-canvas.html">Open Canvas</a>
+      <a href="shortcuts.html">Atajos</a>
+    </nav>
+
+    <div class="header-right">
+      <div class="topstats">
+        <span id="coinsStat" title="Monedas">0</span>
+        <span id="pixelsStat" title="Pixeles">0</span>
+        <span id="chargesStat" title="Cargas">0</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="container art-page-shell">
+    <section class="glass reveal shop-detail-shell" id="shopDetailShell"></section>
+  </main>
+
+  <script src="js/auth-check.js?v=20260502" type="module"></script>
+  <script src="js/state.js" defer></script>
+  <script src="js/ui.js" defer></script>
+  <script src="js/shop-catalog.js" defer></script>
+  <script src="js/shop-detail.js" defer></script>
+</body>
+</html>

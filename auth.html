@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="supabase-url" content="" />
+  <meta name="supabase-key" content="" />
+  <script src="js/canvas-env.js"></script>
+  <script src="js/theme-init.js"></script>
+  <title>Canvas | Autenticación</title>
+  <link rel="stylesheet" href="styles/auth.css" />
+</head>
+<body class="auth-page" data-page="auth">
+  <button id="authThemeToggle" class="auth-theme-toggle" type="button">Modo</button>
+  <div class="auth-container">
+    <div class="auth-panel glass-effect">
+      <div class="auth-header">
+        <img src="images/logo.svg" alt="Canvas" class="logo-icon" />
+        <h1>Canvas</h1>
+        <p class="subtitle">Pixel Art Social Club</p>
+      </div>
+
+      <div class="auth-tabs">
+        <button class="tab-btn active" data-tab="login">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
+            <polyline points="10 17 15 12 10 7" />
+            <line x1="15" y1="12" x2="3" y2="12" />
+          </svg>
+          Ingresar
+        </button>
+        <button class="tab-btn" data-tab="signup">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+            <circle cx="8.5" cy="7" r="4" />
+            <line x1="20" y1="8" x2="20" y2="14" />
+            <line x1="23" y1="11" x2="17" y2="11" />
+          </svg>
+          Registrarse
+        </button>
+      </div>
+
+      <form id="loginForm" class="auth-form active">
+        <div class="form-group">
+          <label for="loginEmail">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="2" y="4" width="20" height="16" rx="2" />
+              <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+            </svg>
+            Correo
+          </label>
+          <input type="email" id="loginEmail" placeholder="tu@email.com" required />
+        </div>
+
+        <div class="form-group">
+          <label for="loginPassword">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+              <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+            </svg>
+            Contraseña
+          </label>
+          <input type="password" id="loginPassword" placeholder="••••••••" required />
+        </div>
+
+        <button type="submit" class="btn-submit">
+          Ingresar
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="9 18 15 12 9 6" />
+          </svg>
+        </button>
+
+        <div id="loginError" class="error-msg hidden"></div>
+      </form>
+
+      <form id="signupForm" class="auth-form">
+        <div class="form-group">
+          <label for="signupUsername">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+              <circle cx="12" cy="7" r="4" />
+            </svg>
+            Usuario
+          </label>
+          <input type="text" id="signupUsername" placeholder="tu_nombre" required />
+        </div>
+
+        <div class="form-group">
+          <label for="signupEmail">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="2" y="4" width="20" height="16" rx="2" />
+              <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+            </svg>
+            Correo
+          </label>
+          <input type="email" id="signupEmail" placeholder="tu@email.com" required />
+        </div>
+
+        <div class="form-group">
+          <label for="signupPassword">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+              <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+            </svg>
+            Contraseña
+          </label>
+          <input type="password" id="signupPassword" placeholder="••••••••" required />
+        </div>
+
+        <div class="form-group">
+          <label for="signupPasswordConfirm">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2m0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8m3.5-9c.83 0 1.5-.67 1.5-1.5S16.33 8 15.5 8 14 8.67 14 9.5s.67 1.5 1.5 1.5zm-7 0c.83 0 1.5-.67 1.5-1.5S9.33 8 8.5 8 7 8.67 7 9.5 7.67 11 8.5 11zm3.5 6.5c2.33 0 4.31-1.46 5.11-3.5H6.89c.8 2.04 2.78 3.5 5.11 3.5z" />
+            </svg>
+            Confirmar
+          </label>
+          <input type="password" id="signupPasswordConfirm" placeholder="••••••••" required />
+        </div>
+
+        <button type="submit" class="btn-submit">
+          Crear Cuenta
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="12 5 19 12 12 19" />
+          </svg>
+        </button>
+
+        <div id="signupError" class="error-msg hidden"></div>
+      </form>
+
+      <div class="auth-footer">
+        <p class="small">Utilizamos Supabase para tu seguridad.</p>
+        <div class="privacy-links">
+          <a href="privacy.html">Privacidad</a>
+          <span>•</span>
+          <a href="terms.html">Términos</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="auth-backdrop"></div>
+  </div>
+
+  <script src="js/supabase-config.js"></script>
+  <script src="js/user-menu.js"></script>
+  <script src="js/auth.js"></script>
+</body>
+</html>
