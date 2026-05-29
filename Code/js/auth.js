@@ -71,7 +71,7 @@
   }
 
   function persistSession(user) {
-    const persistedUser = buildPersistedUser(user);
+    const persistedUser = user?.id ? { id: user.id } : null;
     localStorage.setItem("canvas_user", JSON.stringify(persistedUser));
   }
 

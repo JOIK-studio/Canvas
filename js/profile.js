@@ -10,7 +10,8 @@
   }
 
   function writeUser(user) {
-    localStorage.setItem("canvas_user", JSON.stringify(user));
+    const persistedUser = user?.id ? { id: user.id } : null;
+    localStorage.setItem("canvas_user", JSON.stringify(persistedUser));
   }
 
   function getProfileNames(user, state) {
