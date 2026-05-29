@@ -766,7 +766,7 @@
     state.openCanvas.history = (state.openCanvas.history || []).slice(-OPEN_CANVAS_HISTORY_LIMIT);
     save();
     const after = getStorageStats();
-    addEvent("Admin ejecutó compactación de base del prototipo funcional social.");
+    addEvent("Admin ejecutó compactación de base local de sesión.");
     return { ok: true, before, after };
   }
 

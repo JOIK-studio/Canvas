@@ -27,8 +27,7 @@ No publicaremos la vulnerabilidad hasta que haya un parche disponible o se llegu
 
 ### Autenticación
 
-- **Modo Supabase (producción):** autenticación gestionada íntegramente por Supabase Auth. Las contraseñas nunca llegan al frontend; el backend las hashea con bcrypt. Se admite OAuth (Google, GitHub, etc.) para inicio de sesión sin contraseña.
-- **Modo prototipo funcional social:** las credenciales se almacenan en `localStorage` del navegador. Este modo está pensado **exclusivamente para desarrollo y pruebas**; no debe usarse en entornos de producción ni con cuentas reales.
+- **Modo Supabase (online):** autenticación gestionada íntegramente por Supabase Auth. Las contraseñas nunca llegan al frontend; el backend las hashea con bcrypt. Se admite OAuth (Google, Discord, etc.) para inicio de sesión sin contraseña.
 
 ### Autorización (Base de datos)
 
@@ -75,7 +74,6 @@ Permissions-Policy: geolocation=(), microphone=(), camera=()
 
 | Limitación | Contexto | Mitigación |
 |---|---|---|
-| Contraseñas en `localStorage` en modo prototipo | Solo modo prototipo funcional social | Usar exclusivamente para desarrollo; activar Supabase en producción |
 | Sin rate-limiting en el frontend | El control de cargas es del lado cliente | Implementar rate-limiting en funciones de Supabase Edge o RLS restrictiva |
 | Política `"users create open events"` abierta (`check (true)`) | Cualquier usuario autenticado puede insertar eventos | Revisar si debe restringirse a autores de creaciones activas |
 

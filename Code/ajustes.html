@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
@@ -53,25 +53,18 @@
     <section class="glass reveal activity-card">
       <p class="section-kicker">Ajustes</p>
       <h1>Configuración de Canvas</h1>
-      <p class="lead mini">Gestiona la conexión de tu cuenta y preferencias locales del cliente.</p>
+      <p class="lead mini">Canvas funciona en modo online con Supabase remoto. La conexión ya viene definida por despliegue.</p>
 
       <div class="shortcuts-grid">
         <article>
-          <h3>URL del servicio</h3>
-          <input id="settingsSupabaseUrl" class="input" type="text" placeholder="https://tu-servicio.com" />
+          <h3>Estado de conexión</h3>
+          <p class="mini">Online</p>
         </article>
         <article>
-          <h3>Clave pública</h3>
-          <input id="settingsSupabaseKey" class="input" type="text" placeholder="clave-publica" />
+          <h3>Autenticación</h3>
+          <p class="mini">Supabase (correo y OAuth)</p>
         </article>
       </div>
-
-      <div class="row">
-        <button id="settingsSaveBtn" class="btn solid" type="button">Guardar ajustes</button>
-        <button id="settingsClearBtn" class="btn ghost" type="button">Borrar conexión guardada</button>
-      </div>
-
-      <p id="settingsStatus" class="mini"></p>
     </section>
   </main>
 

@@ -23,7 +23,7 @@
 - **Frontend:** HTML5, CSS3 y JavaScript vanilla (sin frameworks)
 - **Tipos:** TypeScript (`Code/ts/`) para definiciones de interfaces y store
 - **Backend:** [Supabase](https://supabase.com/) — PostgreSQL, Auth y Row Level Security
-- **Autenticación:** Email/contraseña + OAuth (Google, GitHub, etc.) vía Supabase; modo prototipo funcional social como fallback sin backend remoto
+- **Autenticación:** Email/contraseña + OAuth (Google, Discord, etc.) vía Supabase
 
 ---
 
@@ -58,9 +58,9 @@ Para activarlo:
 |---|---|---|
 | **beta0.1** | 29 de abril de 2026 | ✅ Disponible — soporte activo |
 
-### beta0.1 — Primer prototipo funcional social
+### beta0.1 — Primera beta pública
 
-Lanzado el **29 de abril de 2026**. Primera versión pública del prototipo funcional social de Canvas. Incluye:
+Lanzado el **29 de abril de 2026**. Primera versión pública de Canvas. Incluye:
 
 - Editor de pixel art 16 × 16 (ampliable hasta 32 × 32)
 - Open Canvas colaborativo 500 × 500
@@ -68,7 +68,7 @@ Lanzado el **29 de abril de 2026**. Primera versión pública del prototipo func
 - Tienda de recursos con economía de monedas
 - Perfil de usuario con vínculos a cuentas sociales (Google, Discord)
 - Panel de administración para moderación
-- Modo prototipo funcional social como fallback (sin backend remoto)
+- Operación online con Supabase como backend principal
 
 > **Soporte:** La beta0.1 recibe parches de seguridad y correcciones de errores. Reporta fallos abriendo un issue o siguiendo la [política de seguridad](./SECURITY.md).
 

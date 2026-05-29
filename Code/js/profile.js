@@ -82,8 +82,8 @@
   function getSupabaseConfig() {
     const urlMeta = document.querySelector('meta[name="supabase-url"]');
     const keyMeta = document.querySelector('meta[name="supabase-key"]');
-    const url = window.CANVAS_SUPABASE_URL || urlMeta?.content || localStorage.getItem("canvas_supabase_url") || "";
-    const key = window.CANVAS_SUPABASE_KEY || keyMeta?.content || localStorage.getItem("canvas_supabase_key") || "";
+    const url = window.CANVAS_SUPABASE_URL || urlMeta?.content || "";
+    const key = window.CANVAS_SUPABASE_KEY || keyMeta?.content || "";
     return { url: url.trim(), key: key.trim() };
   }
 
