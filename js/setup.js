@@ -14,7 +14,7 @@
   }
 
   function getDisplayName(user) {
-    return user?.user_metadata?.display_name || user?.user_metadata?.username || user?.email?.split("@")[0] || "Artista";
+    return user?.user_metadata?.display_name || user?.user_metadata?.username || "Artista";
   }
 
   function getSupabaseConfig() {
@@ -82,7 +82,7 @@
     if (!user || !form || !nameInput || !bioInput || !msg) return;
 
     nameInput.value = getDisplayName(user);
-    bioInput.value = user?.user_metadata?.bio || "";
+    bioInput.value = "";
 
     form.addEventListener("submit", async (event) => {
       event.preventDefault();
