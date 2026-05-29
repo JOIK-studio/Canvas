@@ -19,7 +19,7 @@
 
   function getStoredUserName() {
     const user = readStoredUser();
-    return user?.user_metadata?.display_name || user?.user_metadata?.username || user?.email?.split("@")[0] || "Artista";
+    return user?.user_metadata?.display_name || user?.user_metadata?.username || "Artista";
   }
 
   function getStoredUserId() {

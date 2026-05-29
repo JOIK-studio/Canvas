@@ -59,14 +59,9 @@
     if (!user || typeof user !== "object") return null;
     return {
       id: user.id || null,
-      email: user.email || null,
       user_metadata: {
         username: user.user_metadata?.username || null
-      },
-      app_metadata: {
-        provider: user.app_metadata?.provider || null
-      },
-      created_at: user.created_at || null
+      }
     };
   }
 
