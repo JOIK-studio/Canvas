@@ -129,7 +129,6 @@ StorageOptimizer.init();
 
 // Reemplazar las funciones de guardado globales si existen
 if (window.CANVAS_STATE) {
-  const originalSave = window.CANVAS_STATE.save;
   window.CANVAS_STATE.save = function() {
     const size = StorageOptimizer.save('canvas_app_state_v3', this);
     console.log(`✓ State saved (${size} bytes)`);
