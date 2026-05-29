@@ -31,7 +31,11 @@
 
   function persistSession(user) {
     localStorage.removeItem("canvas_logged_out_at");
-    localStorage.setItem("canvas_user", JSON.stringify(user));
+    if (user?.id) {
+      localStorage.setItem("canvas_user", JSON.stringify({ id: user.id }));
+    } else {
+      localStorage.removeItem("canvas_user");
+    }
   }
 
   function onboardingKey(userId) {
