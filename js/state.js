@@ -1,5 +1,6 @@
 (function () {
   const STORAGE_KEY = "canvas_app_state_v3";
+  const STORAGE_ENC_VERSION = 1;
   const MAX_CHARGES = 6;
   const PUBLISH_CHARGE_COST = 5;
   const OPEN_CANVAS_SIZE = 500;
@@ -15,6 +16,63 @@
     } catch {
       return null;
     }
+  }
+
+  function bytesToBase64(bytes) {
+    let binary = "";
+    for (let i = 0; i < bytes.length; i += 1) {
+      binary += String.fromCharCode(bytes[i]);
+    }
+    return btoa(binary);
+  }
+
+  function base64ToBytes(base64) {
+    const binary = atob(base64);
+    const out = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i += 1) {
+      out[i] = binary.charCodeAt(i);
+    }
+    return out;
+  }
+
+  async function getStorageCryptoKey() {
+    if (!window.crypto?.subtle) return null;
+    const keyMaterial = `${STORAGE_KEY}:${getStoredUserId() || "anon"}`;
+    const raw = new TextEncoder().encode(keyMaterial);
+    const digest = await window.crypto.subtle.digest("SHA-256", raw);
+    return window.crypto.subtle.importKey("raw", digest, { name: "AES-GCM" }, false, ["encrypt", "decrypt"]);
+  }
+
+  async function encryptStateString(plainText) {
+    const key = await getStorageCryptoKey();
+    if (!key) return null;
+    const iv = window.crypto.getRandomValues(new Uint8Array(12));
+    const encoded = new TextEncoder().encode(plainText);
+    const cipherBuffer = await window.crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, encoded);
+    return JSON.stringify({
+      __enc: STORAGE_ENC_VERSION,
+      iv: bytesToBase64(iv),
+      data: bytesToBase64(new Uint8Array(cipherBuffer))
+    });
+  }
+
+  async function decryptStateString(raw) {
+    if (!raw) return null;
+    let parsed;
+    try {
+      parsed = JSON.parse(raw);
+    } catch {
+      return raw;
+    }
+    if (!parsed || typeof parsed !== "object" || !parsed.__enc || !parsed.iv || !parsed.data) {
+      return raw;
+    }
+    const key = await getStorageCryptoKey();
+    if (!key) return null;
+    const iv = base64ToBytes(parsed.iv);
+    const data = base64ToBytes(parsed.data);
+    const plainBuffer = await window.crypto.subtle.decrypt({ name: "AES-GCM", iv }, key, data);
+    return new TextDecoder().decode(plainBuffer);
   }
 
   function getStoredUserName() {
@@ -366,7 +424,19 @@
     }
   }
 
-  let state = parseState(localStorage.getItem(STORAGE_KEY));
+  let state = parseState(null);
+  let remoteBootstrapStarted = false;
+
+  (async () => {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      const clear = await decryptStateString(raw);
+      state = parseState(clear);
+    } catch {
+      state = parseState(localStorage.getItem(STORAGE_KEY));
+    }
+  })();
+
   let remoteBootstrapStarted = false;
   let remoteBootstrapDone = false;
   let remoteSettingsCache = null;
@@ -559,7 +629,14 @@
   }
 
   function save() {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(packState(state)));
+    const plain = JSON.stringify(packState(state));
+    encryptStateString(plain)
+      .then((encrypted) => {
+        localStorage.setItem(STORAGE_KEY, encrypted || plain);
+      })
+      .catch(() => {
+        localStorage.setItem(STORAGE_KEY, plain);
+      });
     scheduleRemoteSave();
   }
 
