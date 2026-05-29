@@ -1,15 +1,264 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="es">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta http-equiv="refresh" content="0; url=./Code/index.html" />
-    <title>Canvas</title>
-    <script>
-      window.location.replace("./Code/index.html");
-    </script>
-  </head>
-  <body>
-    <p>Redirigiendo a Canvas… <a href="./Code/index.html">Continuar</a></p>
-  </body>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script src="js/canvas-env.js"></script>
+  <script src="js/supabase-config.js"></script>
+  <script>
+    (async function () {
+      function getSupabaseConfig() {
+        const urlMeta = document.querySelector('meta[name="supabase-url"]');
+        const keyMeta = document.querySelector('meta[name="supabase-key"]');
+        const url = window.CANVAS_SUPABASE_URL || urlMeta?.content || localStorage.getItem("canvas_supabase_url") || "";
+        const key = window.CANVAS_SUPABASE_KEY || keyMeta?.content || localStorage.getItem("canvas_supabase_key") || "";
+        return { url: String(url).trim(), key: String(key).trim() };
+      }
+
+      function hasValidSupabaseConfig(config) {
+        if (!config.url || !config.key) return false;
+        if (config.url.includes("your-project") || config.key.includes("your-public-key")) return false;
+        try {
+          const parsed = new URL(config.url);
+          return /^https?:$/.test(parsed.protocol);
+        } catch {
+          return false;
+        }
+      }
+
+      function clearResidualSession() {
+        localStorage.removeItem("canvas_user");
+        localStorage.removeItem("canvas_app_state_v3");
+        sessionStorage.removeItem("canvas_user");
+        sessionStorage.removeItem("canvas_app_state_v3");
+
+        Object.keys(localStorage).forEach((key) => {
+          const lower = key.toLowerCase();
+          if (lower.startsWith("sb-") || lower.includes("supabase.auth") || lower.includes("auth-token")) {
+            localStorage.removeItem(key);
+          }
+        });
+
+        Object.keys(sessionStorage).forEach((key) => {
+          const lower = key.toLowerCase();
+          if (lower.startsWith("sb-") || lower.includes("supabase.auth") || lower.includes("auth-token")) {
+            sessionStorage.removeItem(key);
+          }
+        });
+      }
+
+      async function loadSupabaseClient() {
+        if (window.supabase?.createClient) return true;
+        await new Promise((resolve, reject) => {
+          const script = document.createElement("script");
+          script.src = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
+          script.onload = resolve;
+          script.onerror = reject;
+          document.head.appendChild(script);
+        });
+        return Boolean(window.supabase?.createClient);
+      }
+
+      try {
+        const params = new URLSearchParams(window.location.search);
+        const isLoggedOutFlow = params.get("logged_out") === "1";
+
+        if (isLoggedOutFlow) {
+          localStorage.setItem("canvas_logged_out_at", String(Date.now()));
+          clearResidualSession();
+          return;
+        }
+
+        const config = getSupabaseConfig();
+        if (!hasValidSupabaseConfig(config)) {
+          clearResidualSession();
+          return;
+        }
+
+        const loaded = await Promise.race([
+          loadSupabaseClient(),
+          new Promise((resolve) => setTimeout(() => resolve(false), 1200))
+        ]);
+        if (!loaded) return;
+
+        const client = window.supabase.createClient(config.url, config.key);
+        const result = await Promise.race([
+          client.auth.getSession(),
+          new Promise((resolve) => setTimeout(() => resolve({ data: { session: null } }), 1200))
+        ]);
+
+        const user = result?.data?.session?.user || null;
+        if (user) {
+          localStorage.setItem("canvas_user", JSON.stringify(user));
+          window.location.replace("app.html");
+          return;
+        }
+
+        clearResidualSession();
+      } catch {
+        // Silencioso: la landing pública sigue disponible aunque falle el precheck.
+      }
+    })();
+  </script>
+  <script src="js/theme-init.js"></script>
+  <title>Canvas | Landing</title>
+  <link rel="stylesheet" href="styles/main.css" />
+</head>
+<body data-page="landing">
+  <header class="topbar glass landing-topbar">
+    <div class="header-left">
+      <a class="brand" href="index.html">
+        <img src="images/logo.svg" alt="Canvas" class="brand-logo" />
+        Canvas
+      </a>
+    </div>
+
+    <nav class="topnav landing-nav">
+      <a href="#features">Producto</a>
+      <a href="#community">Comunidad</a>
+      <a href="#economy">Economía</a>
+      <a href="#faq">FAQ</a>
+    </nav>
+
+    <div class="header-right">
+      <a class="btn ghost sm" href="auth.html">Entrar</a>
+    </div>
+  </header>
+
+  <main class="container landing-shell">
+    <section class="glass reveal landing-hero">
+      <div class="landing-copy">
+        <p class="eyebrow">Canvas Live</p>
+        <h1>Diseña pixel art, publícalo y domina el mural global</h1>
+        <p class="lead">
+          Canvas conecta editor, galería, tienda y Open Canvas en una sola sesión.
+          Cada trazo tiene impacto real: recursos, visibilidad y progreso persistente en tu cuenta.
+        </p>
+        <div class="cta-row">
+          <a class="btn solid" href="auth.html">Empezar gratis</a>
+          <a class="btn ghost" href="auth.html">Ver mi cuenta</a>
+        </div>
+        <div class="landing-meta">
+          <span class="profile-tag">Editor escalable</span>
+          <span class="profile-tag">Open Canvas 500x500</span>
+          <span class="profile-tag">Likes, boosts y remix</span>
+          <span class="profile-tag">Sincronización cloud</span>
+        </div>
+      </div>
+      <div class="landing-stage">
+        <div class="hero-panel glass">
+          <div class="hero-grid">
+            <span style="background:#0a84ff"></span>
+            <span style="background:#5e5ce6"></span>
+            <span style="background:#30b0c7"></span>
+            <span style="background:#ffffff"></span>
+            <span style="background:#ffffff"></span>
+            <span style="background:#30b0c7"></span>
+            <span style="background:#5e5ce6"></span>
+            <span style="background:#0a84ff"></span>
+            <span style="background:#30b0c7"></span>
+            <span style="background:#ffffff"></span>
+            <span style="background:#0a84ff"></span>
+            <span style="background:#5e5ce6"></span>
+            <span style="background:#5e5ce6"></span>
+            <span style="background:#0a84ff"></span>
+            <span style="background:#ffffff"></span>
+            <span style="background:#30b0c7"></span>
+          </div>
+          <div class="hero-stage-copy">
+            <strong>Actividad real en tiempo real</strong>
+            <p>Pasa de boceto privado a mural global y compite por espacio visual con cada publicación.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="features" class="landing-feature-grid">
+      <article class="glass reveal feature-card feature-card-wide">
+        <p class="section-kicker">Flujo</p>
+        <h2>Un sistema completo para crear, iterar y crecer</h2>
+        <p>Editor, economía, perfil y mural compartido trabajan juntos para sesiones largas sin fricción.</p>
+      </article>
+      <article class="glass reveal feature-card">
+        <h3>Editor competitivo</h3>
+        <p>Herramientas rápidas, paleta clara y publicación directa en segundos.</p>
+      </article>
+      <article class="glass reveal feature-card">
+        <h3>Remix con impacto</h3>
+        <p>Tomas obras existentes, las transformas y vuelves a competir por visibilidad.</p>
+      </article>
+      <article class="glass reveal feature-card">
+        <h3>Cuenta persistente</h3>
+        <p>Tus recursos, upgrades y ritmo de juego se guardan entre sesiones.</p>
+      </article>
+    </section>
+
+    <section class="landing-flow" aria-label="Cómo funciona Canvas">
+      <article class="glass reveal flow-step">
+        <p class="section-kicker">Paso 1</p>
+        <h3>Crea</h3>
+        <p>Diseña tu pieza con el editor y afina tu estilo visual.</p>
+      </article>
+      <article class="glass reveal flow-step">
+        <p class="section-kicker">Paso 2</p>
+        <h3>Publica</h3>
+        <p>Lanza tu obra, gana interacción y sube en tendencia.</p>
+      </article>
+      <article class="glass reveal flow-step">
+        <p class="section-kicker">Paso 3</p>
+        <h3>Escala</h3>
+        <p>Mejora recursos en tienda y vuelve más fuerte al mural.</p>
+      </article>
+    </section>
+
+    <section id="community" class="glass reveal landing-band">
+      <div>
+        <p class="section-kicker">Comunidad</p>
+        <h2>Publicar es el comienzo, no el final</h2>
+      </div>
+      <p>Cada obra recibe comentarios, likes, boosts y presencia en Open Canvas. El feed se mueve con cada acción de la comunidad.</p>
+    </section>
+
+    <section id="economy" class="landing-stat-grid">
+      <article class="glass reveal stat-card">
+        <strong>Cargas vivas</strong>
+        <span>Gestiona ritmo y ventanas de publicación</span>
+      </article>
+      <article class="glass reveal stat-card">
+        <strong>Píxeles con coste</strong>
+        <span>Inventario real por cada pieza publicada</span>
+      </article>
+      <article class="glass reveal stat-card">
+        <strong>Boost social</strong>
+        <span>Empuja obras para escalar visibilidad</span>
+      </article>
+    </section>
+
+    <section id="faq" class="glass reveal landing-faq">
+      <div>
+        <p class="section-kicker">Acceso</p>
+        <h2>Explora primero. Entra cuando quieras competir.</h2>
+      </div>
+      <p>La landing es pública. El editor, la galería, la tienda, el perfil y Open Canvas requieren sesión para proteger tu progreso.</p>
+      <div class="cta-row landing-final-cta">
+        <a class="btn solid" href="auth.html">Crear cuenta</a>
+        <a class="btn ghost" href="auth.html">Iniciar sesión</a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="landing-footer">
+    <div class="landing-footer-inner">
+      <span class="landing-footer-brand">Canvas &copy; 2026</span>
+      <nav class="landing-footer-links" aria-label="Legal">
+        <a href="privacy.html">Privacidad</a>
+        <span aria-hidden="true">&bull;</span>
+        <a href="terms.html">T&eacute;rminos</a>
+      </nav>
+    </div>
+  </footer>
+
+  <script src="js/ui.js" defer></script>
+  <script src="js/landing.js" defer></script>
+</body>
 </html>
