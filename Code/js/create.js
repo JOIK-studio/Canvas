@@ -195,7 +195,8 @@
   }
 
   function tryLoadRemix(ctx) {
-    const remixId = new URLSearchParams(window.location.search).get("remix");
+    const remixId = String(new URLSearchParams(window.location.search).get("remix") || "").trim();
+    if (!/^[\w-]{1,80}$/.test(remixId)) return;
     if (!remixId) return;
     const src = window.CanvasApp.Store.getCreationById(remixId);
     if (src && src.grid) {

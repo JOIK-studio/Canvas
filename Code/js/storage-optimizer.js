@@ -86,14 +86,12 @@ const StorageOptimizer = {
   },
 
   // Cargar estado y descomprimir
-  load(key) {
-    void key;
+  load(_key) {
     return null;
   },
 
   // Obtener estadísticas de compresión
-  getStats(key) {
-    void key;
+  getStats(_key) {
     return null;
   }
 };

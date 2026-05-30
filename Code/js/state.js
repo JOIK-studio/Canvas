@@ -833,7 +833,7 @@
     const { userId } = await getRemoteUserContext(client);
     if (!client || !userId) return;
 
-    const { error: deleteError } = await client.from("open_canvas_pixels").delete().gte("x", 0).gte("y", 0);
+    const { error: deleteError } = await client.from("open_canvas_pixels").delete();
     if (deleteError) throw deleteError;
 
     const entries = Object.entries(pixels || {});
@@ -1378,7 +1378,7 @@
       try {
         const client = await getSupabaseClient();
         if (!client) return;
-        const { error } = await client.from("open_canvas_events").delete().gte("created_at", "1970-01-01T00:00:00.000Z");
+        const { error } = await client.from("open_canvas_events").delete();
         if (error) throw error;
         await syncEventRemote("admin", "Admin limpió el feed de eventos.", { action: "clear_events" });
       } catch (error) {
