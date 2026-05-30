@@ -32,14 +32,21 @@
     if (!user || typeof user !== "object") return null;
     return {
       id: user.id || null,
+      email: user.email || null,
       user_metadata: {
-        username: user.user_metadata?.username || null
+        username: user.user_metadata?.username || null,
+        display_name: user.user_metadata?.display_name || null,
+        bio: user.user_metadata?.bio || null
+      },
+      app_metadata: {
+        provider: user.app_metadata?.provider || null,
+        providers: Array.isArray(user.app_metadata?.providers) ? user.app_metadata.providers : []
       }
     };
   }
 
   function persistSession(user) {
-    const persistedUser = user?.id ? { id: user.id } : null;
+    const persistedUser = buildPersistedUser(user);
     localStorage.setItem("canvas_user", JSON.stringify(persistedUser));
   }
 
