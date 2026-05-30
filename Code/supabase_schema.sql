@@ -80,6 +80,13 @@ create table if not exists public.open_canvas_events (
   created_at timestamptz not null default now()
 );
 
+alter table public.open_canvas_events
+drop constraint if exists open_canvas_events_event_type_check;
+
+alter table public.open_canvas_events
+add constraint open_canvas_events_event_type_check
+check (event_type in ('publish', 'like', 'boost', 'remix', 'shop', 'paint', 'comment', 'admin', 'system', 'social'));
+
 create table if not exists public.open_canvas_pixels (
   x integer not null check (x between 0 and 499),
   y integer not null check (y between 0 and 499),

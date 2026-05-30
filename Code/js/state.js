@@ -1543,12 +1543,11 @@
     const social = normalizeSocialLinks(state.user.socialLinks);
     social[key].handle = normalizeHandle(handle);
     state.user.socialLinks = social;
-    state.user.socialLinks = social;
+    syncProfileRemote().catch(markRemoteSyncError);
     return { ok: true, social: clone(social[key]) };
   }
-  }
+
   function getSocialLinks() {
-    syncSocialLinksFromSession();
     syncSocialLinksFromSession();
     return clone(state.user.socialLinks);
   }

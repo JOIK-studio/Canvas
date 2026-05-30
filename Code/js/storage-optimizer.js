@@ -82,45 +82,19 @@ const StorageOptimizer = {
   save(key, state) {
     const compressed = this.compress(state);
     const json = JSON.stringify(compressed);
-    localStorage.setItem(key, json);
     return json.length;
   },
 
   // Cargar estado y descomprimir
   load(key) {
-    const json = localStorage.getItem(key);
-    if (!json) return null;
-    try {
-      const compressed = JSON.parse(json);
-      return this.decompress(compressed);
-    } catch (e) {
-      console.error('Error decompressing:', e);
-      return null;
-    }
+    void key;
+    return null;
   },
 
   // Obtener estadísticas de compresión
   getStats(key) {
-    const uncompressed = localStorage.getItem(key);
-    if (!uncompressed) return null;
-
-    try {
-      const original = JSON.parse(uncompressed);
-      const compressed = this.compress(original);
-      const compressedJson = JSON.stringify(compressed);
-
-      const originalSize = new Blob([uncompressed]).size;
-      const compressedSize = new Blob([compressedJson]).size;
-      const savings = ((1 - compressedSize / originalSize) * 100).toFixed(2);
-
-      return {
-        originalSize,
-        compressedSize,
-        savings: savings + '%'
-      };
-    } catch (e) {
-      return null;
-    }
+    void key;
+    return null;
   }
 };
 
