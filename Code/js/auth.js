@@ -190,8 +190,9 @@
 
       button.addEventListener("click", async () => {
         const provider = button.dataset.provider;
+        const formId = button.closest("form")?.id === "signupForm" ? "signup" : "login";
         if (!enabled || !supabaseClient || !provider) {
-          showError("login", "OAuth solo está disponible con Supabase activo.");
+          showError(formId, "OAuth solo está disponible con Supabase activo.");
           return;
         }
 
@@ -205,11 +206,14 @@
           });
 
           if (error) {
-            showError("login", error.message || "No se pudo iniciar sesión con OAuth");
+            const fallback = formId === "signup"
+              ? "No se pudo iniciar el registro con OAuth"
+              : "No se pudo iniciar sesión con OAuth";
+            showError(formId, error.message || fallback);
             button.disabled = false;
           }
         } catch (error) {
-          showError("login", "Error de conexión con OAuth.");
+          showError(formId, "Error de conexión con OAuth.");
           button.disabled = false;
         }
       });

@@ -1,7 +1,23 @@
 (function () {
+  function renderAccessDenied() {
+    const main = document.querySelector("main.container");
+    if (!main) return;
+
+    main.innerHTML = `
+      <section class="glass reveal admin-hero">
+        <h1>Acceso denegado</h1>
+        <p class="lead mini">No tienes permisos para acceder al panel de administración.</p>
+        <p class="hint">Serás redirigido al inicio en 3 segundos...</p>
+      </section>
+    `;
+  }
+
   function ensureAdmin() {
     if (!window.CanvasApp.Store.isCurrentUserAdmin()) {
-      window.location.href = "app.html";
+      renderAccessDenied();
+      window.setTimeout(() => {
+        window.location.href = "app.html";
+      }, 3000);
       return false;
     }
     return true;
