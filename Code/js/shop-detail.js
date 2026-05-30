@@ -105,8 +105,8 @@
   }
 
   function applyEnterFx() {
-    if (sessionStorage.getItem("canvas_shop_detail_fx") !== "zoom") return;
-    sessionStorage.removeItem("canvas_shop_detail_fx");
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("fx") !== "zoom") return;
     document.body.classList.add("shop-detail-entering");
     requestAnimationFrame(() => {
       document.body.classList.add("shop-detail-entered");
@@ -114,6 +114,10 @@
     window.setTimeout(() => {
       document.body.classList.remove("shop-detail-entering", "shop-detail-entered");
     }, 440);
+    params.delete("fx");
+    const nextSearch = params.toString();
+    const nextUrl = `${window.location.pathname}${nextSearch ? `?${nextSearch}` : ""}${window.location.hash || ""}`;
+    window.history.replaceState({}, "", nextUrl);
   }
 
   function init() {

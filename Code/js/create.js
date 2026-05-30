@@ -195,15 +195,17 @@
   }
 
   function tryLoadRemix(ctx) {
-    const app = window.CanvasApp.Store.getState();
-    if (!app.remixSourceId) return;
-    const src = window.CanvasApp.Store.getCreationById(app.remixSourceId);
+    const remixId = String(new URLSearchParams(window.location.search).get("remix") || "").trim();
+    if (!/^[\w-]{1,80}$/.test(remixId)) return;
+    if (!remixId) return;
+    const src = window.CanvasApp.Store.getCreationById(remixId);
     if (src && src.grid) {
       state.grid = normalizeGrid(src.grid);
       drawGrid(ctx);
       toast(`Remix cargado: ${src.title}`);
     }
-    window.CanvasApp.Store.clearRemixSource();
+    const nextUrl = `${window.location.pathname}${window.location.hash || ""}`;
+    window.history.replaceState({}, "", nextUrl);
   }
 
   function publish(ctx) {

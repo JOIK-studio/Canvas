@@ -263,6 +263,70 @@ body::after {
   backdrop-filter: blur(5px);
 }
 
+.settings-shell {
+  display: grid;
+  gap: 16px;
+}
+
+.settings-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.settings-tab {
+  border: 1px solid var(--line);
+  background: var(--panel-2);
+  color: var(--text);
+  border-radius: 999px;
+  padding: 8px 14px;
+  cursor: pointer;
+}
+
+.settings-tab.active {
+  border-color: var(--line-strong);
+  box-shadow: var(--shadow-neon);
+}
+
+.settings-panel {
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: rgba(7, 14, 40, 0.45);
+}
+
+.settings-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px dashed var(--line);
+}
+
+.settings-toggle:last-child {
+  border-bottom: 0;
+}
+
+.settings-safe-card {
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--panel-2);
+  display: grid;
+  gap: 8px;
+}
+
+body.compact-ui .container {
+  max-width: 1024px;
+}
+
+body.compact-ui .activity-card {
+  padding: 18px;
+}
+
 :root[data-theme="light"] .glass {
   background: linear-gradient(165deg, rgba(255, 255, 255, 0.93), rgba(240, 246, 255, 0.9));
 }
@@ -1336,6 +1400,12 @@ body[data-page="open-canvas"] .topbar {
   z-index: 40;
 }
 
+body[data-page="open-canvas"] {
+  --oc-bottom-offset: max(14px, calc(env(safe-area-inset-bottom, 0px) + 8px));
+  --oc-menu-gap: 56px;
+  --oc-glass-overlay-opacity: 0.35;
+}
+
 body[data-page="open-canvas"].oc-topbar-visible .topbar,
 body[data-page="open-canvas"] .topbar:hover,
 body[data-page="open-canvas"] .topbar:focus-within {
@@ -1375,12 +1445,32 @@ body[data-page="open-canvas"] .topbar:focus-within {
 .oc-hud {
   position: absolute;
   z-index: 10;
+  overflow: hidden;
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
   border-radius: 14px;
   border: 1px solid rgba(255, 255, 255, 0.09);
   background: rgba(4, 10, 28, 0.82);
   color: var(--text);
+}
+
+.oc-hud::before {
+  content: "";
+  position: absolute;
+  inset: -55% -20%;
+  background: linear-gradient(
+    120deg,
+    rgba(255, 255, 255, 0) 25%,
+    rgba(255, 255, 255, 0.17) 48%,
+    rgba(255, 255, 255, 0) 72%
+  );
+  pointer-events: none;
+  animation: ocGlassFlow 10s ease-in-out infinite;
+}
+
+.oc-hud > * {
+  position: relative;
+  z-index: 1;
 }
 
 /* top-left: coords + zoom + count */
@@ -1420,8 +1510,9 @@ body[data-page="open-canvas"] .topbar:focus-within {
 
 /* bottom: palette + controls */
 .oc-hud-bottom {
-  bottom: 16px;
+  position: fixed;
   left: 50%;
+  bottom: var(--oc-bottom-offset);
   transform: translateX(-50%);
   padding: 9px 12px;
   display: flex;
@@ -1430,7 +1521,6 @@ body[data-page="open-canvas"] .topbar:focus-within {
   gap: 0;
   max-width: calc(100vw - 32px);
   flex-wrap: nowrap;
-  position: relative;
   min-width: 188px;
 }
 
@@ -1474,7 +1564,7 @@ body[data-page="open-canvas"] .topbar:focus-within {
 .oc-paint-menu {
   position: fixed;
   left: 50%;
-  bottom: 72px;
+  bottom: calc(var(--oc-bottom-offset) + var(--oc-menu-gap));
   transform: translate(-50%, 8px) scale(0.98);
   width: min(920px, calc(100vw - 32px));
   padding: 10px;
@@ -1486,6 +1576,22 @@ body[data-page="open-canvas"] .topbar:focus-within {
   justify-items: center;
   opacity: 0;
   pointer-events: none;
+}
+
+.oc-paint-menu::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(140deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0) 46%);
+  opacity: var(--oc-glass-overlay-opacity);
+  animation: ocGlassPulse 6s ease-in-out infinite;
+}
+
+.oc-paint-menu > * {
+  position: relative;
+  z-index: 1;
 }
 
 .oc-paint-menu.open {
@@ -1501,6 +1607,48 @@ body[data-page="open-canvas"] .topbar:focus-within {
   100% {
     opacity: 1;
     transform: translate(-50%, 0) scale(1);
+  }
+}
+
+@keyframes ocGlassFlow {
+  0%,
+  100% {
+    transform: translate3d(-12%, -8%, 0) rotate(-8deg);
+    opacity: 0.2;
+  }
+  50% {
+    transform: translate3d(10%, 10%, 0) rotate(-8deg);
+    opacity: 0.38;
+  }
+}
+
+@keyframes ocGlassPulse {
+  0%,
+  100% {
+    opacity: 0.22;
+  }
+  50% {
+    opacity: 0.42;
+  }
+}
+
+@keyframes ocButtonBreathe {
+  0%,
+  100% {
+    transform: translateY(0);
+    box-shadow: 0 0 0 rgba(10, 132, 255, 0.18);
+  }
+  50% {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 20px rgba(10, 132, 255, 0.18);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .oc-hud::before,
+  .oc-paint-menu::after,
+  .oc-paint-btn {
+    animation: none;
   }
 }
 
@@ -1543,7 +1691,8 @@ body[data-page="open-canvas"] .topbar:focus-within {
   white-space: nowrap;
   flex-shrink: 0;
   transition: background var(--transition), border-color var(--transition),
-    box-shadow var(--transition), opacity var(--transition);
+    box-shadow var(--transition), opacity var(--transition), transform var(--transition);
+  animation: ocButtonBreathe 4.5s ease-in-out infinite;
 }
 
 #openPaintBtn {
@@ -2944,6 +3093,10 @@ body.app-loaded .app-hero .cta-row {
 }
 
 @media (max-width: 860px) {
+  body[data-page="open-canvas"] {
+    --oc-menu-gap: 58px;
+  }
+
   .topbar {
     flex-wrap: wrap;
   }
@@ -3015,10 +3168,6 @@ body.app-loaded .app-hero .cta-row {
     max-width: min(620px, calc(100vw - 180px));
   }
 
-  .oc-paint-menu {
-    bottom: 74px;
-  }
-
   .gallery-modal-layout {
     grid-template-columns: 1fr;
   }
@@ -3041,6 +3190,11 @@ body.app-loaded .app-hero .cta-row {
 }
 
 @media (max-width: 620px) {
+  body[data-page="open-canvas"] {
+    --oc-bottom-offset: max(12px, calc(env(safe-area-inset-bottom, 0px) + 8px));
+    --oc-menu-gap: 56px;
+  }
+
   .topstats span span {
     display: none;
   }
@@ -3087,7 +3241,6 @@ body.app-loaded .app-hero .cta-row {
 
   .oc-paint-menu {
     width: calc(100vw - 20px);
-    bottom: 70px;
   }
 
   .oc-palette {

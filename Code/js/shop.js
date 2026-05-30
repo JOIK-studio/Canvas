@@ -2,10 +2,9 @@
   const ITEMS = window.CanvasApp.ShopCatalog.ITEMS;
 
   function goToDetail(itemId) {
-    sessionStorage.setItem("canvas_shop_detail_fx", "zoom");
     document.body.classList.add("shop-to-detail-leaving");
     window.setTimeout(() => {
-      window.location.href = `shop-item.html?id=${encodeURIComponent(itemId)}`;
+      window.location.href = `shop-item.html?id=${encodeURIComponent(itemId)}&fx=zoom`;
     }, 170);
   }
 

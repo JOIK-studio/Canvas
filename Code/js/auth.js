@@ -1,6 +1,5 @@
 // Script de autenticación
 (function () {
-  const AUTH_MODE_KEY = "canvas_auth_mode";
   const SIGNUP_FORM_ID = "signupForm";
 
   function setupThemeToggle() {
@@ -60,7 +59,6 @@
   }
 
   function setMode(mode) {
-    localStorage.setItem(AUTH_MODE_KEY, mode);
     document.body.dataset.authMode = mode;
   }
 
