@@ -1,6 +1,7 @@
 // Script de autenticación
 (function () {
   const AUTH_MODE_KEY = "canvas_auth_mode";
+  const SIGNUP_FORM_ID = "signupForm";
 
   function setupThemeToggle() {
     const button = document.getElementById("authThemeToggle");
@@ -190,7 +191,7 @@
 
       button.addEventListener("click", async () => {
         const provider = button.dataset.provider;
-        const formId = button.closest("form")?.id === "signupForm" ? "signup" : "login";
+        const formId = button.closest("form")?.id === SIGNUP_FORM_ID ? "signup" : "login";
         if (!enabled || !supabaseClient || !provider) {
           showError(formId, "OAuth solo está disponible con Supabase activo.");
           return;
