@@ -25,6 +25,7 @@
   setupThemeToggle();
 
   let supabaseClient;
+  let cachedUser = null;
 
   bootAuth();
 
@@ -39,16 +40,11 @@
   }
 
   function persistSession(user) {
-    const persistedUser = user?.id ? { id: user.id } : null;
-    localStorage.setItem("canvas_user", JSON.stringify(persistedUser));
+    cachedUser = user?.id ? { id: user.id } : null;
   }
 
   function readStoredUser() {
-    try {
-      return JSON.parse(localStorage.getItem("canvas_user") || "null");
-    } catch {
-      return null;
-    }
+    return cachedUser;
   }
 
   function setMode(mode) {
