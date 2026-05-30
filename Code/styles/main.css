@@ -1336,6 +1336,12 @@ body[data-page="open-canvas"] .topbar {
   z-index: 40;
 }
 
+body[data-page="open-canvas"] {
+  --oc-bottom-offset: max(14px, calc(env(safe-area-inset-bottom, 0px) + 8px));
+  --oc-menu-gap: 56px;
+  --oc-glass-overlay-opacity: 0.35;
+}
+
 body[data-page="open-canvas"].oc-topbar-visible .topbar,
 body[data-page="open-canvas"] .topbar:hover,
 body[data-page="open-canvas"] .topbar:focus-within {
@@ -1442,7 +1448,7 @@ body[data-page="open-canvas"] .topbar:focus-within {
 .oc-hud-bottom {
   position: fixed;
   left: 50%;
-  bottom: max(14px, calc(env(safe-area-inset-bottom, 0px) + 8px));
+  bottom: var(--oc-bottom-offset);
   transform: translateX(-50%);
   padding: 9px 12px;
   display: flex;
@@ -1494,7 +1500,7 @@ body[data-page="open-canvas"] .topbar:focus-within {
 .oc-paint-menu {
   position: fixed;
   left: 50%;
-  bottom: calc(max(14px, env(safe-area-inset-bottom, 0px) + 8px) + 56px);
+  bottom: calc(var(--oc-bottom-offset) + var(--oc-menu-gap));
   transform: translate(-50%, 8px) scale(0.98);
   width: min(920px, calc(100vw - 32px));
   padding: 10px;
@@ -1515,7 +1521,7 @@ body[data-page="open-canvas"] .topbar:focus-within {
   border-radius: inherit;
   pointer-events: none;
   background: linear-gradient(140deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0) 46%);
-  opacity: 0.35;
+  opacity: var(--oc-glass-overlay-opacity);
   animation: ocGlassPulse 6s ease-in-out infinite;
 }
 
@@ -3023,6 +3029,10 @@ body.app-loaded .app-hero .cta-row {
 }
 
 @media (max-width: 860px) {
+  body[data-page="open-canvas"] {
+    --oc-menu-gap: 58px;
+  }
+
   .topbar {
     flex-wrap: wrap;
   }
@@ -3094,10 +3104,6 @@ body.app-loaded .app-hero .cta-row {
     max-width: min(620px, calc(100vw - 180px));
   }
 
-  .oc-paint-menu {
-    bottom: calc(max(14px, env(safe-area-inset-bottom, 0px) + 8px) + 58px);
-  }
-
   .gallery-modal-layout {
     grid-template-columns: 1fr;
   }
@@ -3120,6 +3126,11 @@ body.app-loaded .app-hero .cta-row {
 }
 
 @media (max-width: 620px) {
+  body[data-page="open-canvas"] {
+    --oc-bottom-offset: max(12px, calc(env(safe-area-inset-bottom, 0px) + 8px));
+    --oc-menu-gap: 56px;
+  }
+
   .topstats span span {
     display: none;
   }
@@ -3166,7 +3177,6 @@ body.app-loaded .app-hero .cta-row {
 
   .oc-paint-menu {
     width: calc(100vw - 20px);
-    bottom: calc(max(12px, env(safe-area-inset-bottom, 0px) + 8px) + 56px);
   }
 
   .oc-palette {
