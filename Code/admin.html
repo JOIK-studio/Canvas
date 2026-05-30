@@ -149,6 +149,34 @@
       </article>
 
       <article class="glass admin-card reveal">
+        <h2>Pantalla global</h2>
+        <p class="hint">Muestra avisos o mantenimiento para toda la app (excepto admins en panel).</p>
+        <div class="admin-tool-grid">
+          <label class="form-group">
+            <span>Modo</span>
+            <select id="adminGlobalMode">
+              <option value="off">Desactivado</option>
+              <option value="maintenance">Mantenimiento</option>
+              <option value="notice">Aviso</option>
+            </select>
+          </label>
+          <label class="form-group">
+            <span>Título</span>
+            <input id="adminGlobalTitle" type="text" maxlength="80" placeholder="Ej: Mantenimiento programado" />
+          </label>
+          <label class="form-group" style="grid-column: 1 / -1;">
+            <span>Mensaje</span>
+            <textarea id="adminGlobalMessage" rows="4" maxlength="420" placeholder="Explica qué está pasando y cuándo vuelve la app."></textarea>
+          </label>
+        </div>
+        <div class="admin-inline-actions">
+          <button id="adminApplyGlobalScreen" class="btn solid sm" type="button">Publicar pantalla</button>
+          <button id="adminDisableGlobalScreen" class="btn ghost sm" type="button">Desactivar</button>
+        </div>
+        <p id="adminGlobalScreenStatus" class="hint"></p>
+      </article>
+
+      <article class="glass admin-card reveal">
         <h2>Galería</h2>
         <p class="hint">Eliminar obras problemáticas desde este listado.</p>
         <div id="adminCreations" class="admin-list"></div>

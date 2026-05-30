@@ -120,6 +120,89 @@
     nav.appendChild(anchor);
   }
 
+  function removeSystemScreenNodes() {
+    document.getElementById("globalSystemScreen")?.remove();
+    document.getElementById("globalSystemScreenBanner")?.remove();
+  }
+
+  function renderSystemScreen() {
+    removeSystemScreenNodes();
+    if (!window.CanvasApp?.Store?.getSystemScreen) return;
+
+    const screen = window.CanvasApp.Store.getSystemScreen();
+    if (!screen || screen.mode === "off") return;
+
+    const isAdmin = Boolean(window.CanvasApp.Store.isCurrentUserAdmin?.());
+    const title = screen.title || (screen.mode === "maintenance" ? "Mantenimiento en curso" : "Aviso global");
+    const message = screen.message || "";
+
+    if (isAdmin) {
+      const banner = document.createElement("div");
+      banner.id = "globalSystemScreenBanner";
+      banner.style.position = "fixed";
+      banner.style.left = "12px";
+      banner.style.right = "12px";
+      banner.style.bottom = "12px";
+      banner.style.zIndex = "900";
+      banner.style.padding = "10px 14px";
+      banner.style.borderRadius = "12px";
+      banner.style.background = "rgba(17,24,39,0.92)";
+      banner.style.border = "1px solid rgba(248,250,252,0.2)";
+      banner.style.color = "#f8fafc";
+      banner.style.fontSize = "14px";
+      banner.textContent = `Pantalla global activa (${screen.mode}). Vista solo admin.`;
+      document.body.appendChild(banner);
+      return;
+    }
+
+    const overlay = document.createElement("section");
+    overlay.id = "globalSystemScreen";
+    overlay.setAttribute("role", "alertdialog");
+    overlay.setAttribute("aria-modal", "true");
+
+    overlay.setAttribute("aria-label", title);
+
+    overlay.style.position = "fixed";
+    overlay.style.inset = "0";
+    overlay.style.zIndex = "1200";
+    overlay.style.display = "grid";
+    overlay.style.placeItems = "center";
+    overlay.style.padding = "24px";
+    overlay.style.background = "rgba(2,6,23,0.88)";
+
+    const card = document.createElement("article");
+    card.style.width = "min(680px, 100%)";
+    card.style.background = "#0f172a";
+    card.style.border = "1px solid rgba(148,163,184,0.25)";
+    card.style.borderRadius = "16px";
+    card.style.padding = "24px";
+    card.style.color = "#f8fafc";
+    card.style.boxShadow = "0 20px 50px rgba(0,0,0,0.4)";
+
+    const label = document.createElement("p");
+    label.style.margin = "0 0 8px";
+    label.style.fontSize = "12px";
+    label.style.letterSpacing = ".08em";
+    label.style.textTransform = "uppercase";
+    label.style.color = "#93c5fd";
+    label.textContent = screen.mode === "maintenance" ? "Mantenimiento" : "Aviso";
+
+    const titleNode = document.createElement("h1");
+    titleNode.style.margin = "0 0 10px";
+    titleNode.style.fontSize = "clamp(1.3rem, 2vw, 1.8rem)";
+    titleNode.textContent = title;
+
+    const msgNode = document.createElement("p");
+    msgNode.style.margin = "0";
+    msgNode.style.whiteSpace = "pre-line";
+    msgNode.style.lineHeight = "1.6";
+    msgNode.textContent = message;
+
+    card.append(label, titleNode, msgNode);
+    overlay.appendChild(card);
+    document.body.appendChild(overlay);
+  }
+
   function initThemeControl() {
     const headerRight = document.querySelector(".header-right");
     const dropdown = document.getElementById("userDropdown");
@@ -286,6 +369,7 @@
     normalizeProfileLinks();
     ensureSettingsLinks();
     ensureAdminTab();
+    renderSystemScreen();
     initThemeControl();
     updateTopStats();
     initReveal();

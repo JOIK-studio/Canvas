@@ -1,6 +1,7 @@
 // Script de autenticación
 (function () {
   const AUTH_MODE_KEY = "canvas_auth_mode";
+  const SIGNUP_FORM_ID = "signupForm";
 
   function setupThemeToggle() {
     const button = document.getElementById("authThemeToggle");
@@ -32,14 +33,21 @@
     if (!user || typeof user !== "object") return null;
     return {
       id: user.id || null,
+      email: user.email || null,
       user_metadata: {
-        username: user.user_metadata?.username || null
+        username: user.user_metadata?.username || null,
+        display_name: user.user_metadata?.display_name || null,
+        bio: user.user_metadata?.bio || null
+      },
+      app_metadata: {
+        provider: user.app_metadata?.provider || null,
+        providers: Array.isArray(user.app_metadata?.providers) ? user.app_metadata.providers : []
       }
     };
   }
 
   function persistSession(user) {
-    const persistedUser = user?.id ? { id: user.id } : null;
+    const persistedUser = buildPersistedUser(user);
     localStorage.setItem("canvas_user", JSON.stringify(persistedUser));
   }
 
@@ -66,6 +74,9 @@
   }
 
   function getSupabaseConfig() {
+    if (window.CanvasApp?.SupabaseConfig?.read) {
+      return window.CanvasApp.SupabaseConfig.read();
+    }
     const fromWindow = window.CANVAS_SUPABASE_CONFIG || {};
     const urlMeta = document.querySelector('meta[name="supabase-url"]');
     const keyMeta = document.querySelector('meta[name="supabase-key"]');
@@ -76,7 +87,13 @@
 
   function hasValidSupabaseConfig(config) {
     if (!config.url || !config.key) return false;
-    if (config.url.includes("your-project") || config.key.includes("your-public-key")) return false;
+    if (
+      config.url.includes("your-project") ||
+      config.key.includes("your-public-key") ||
+      config.key.includes("your-anon-key")
+    ) {
+      return false;
+    }
     try {
       const parsed = new URL(config.url);
       return /^https?:$/.test(parsed.protocol);
@@ -174,8 +191,9 @@
 
       button.addEventListener("click", async () => {
         const provider = button.dataset.provider;
+        const formId = button.closest("form")?.id === SIGNUP_FORM_ID ? "signup" : "login";
         if (!enabled || !supabaseClient || !provider) {
-          showError("login", "OAuth solo está disponible con Supabase activo.");
+          showError(formId, "OAuth solo está disponible con Supabase activo.");
           return;
         }
 
@@ -189,11 +207,14 @@
           });
 
           if (error) {
-            showError("login", error.message || "No se pudo iniciar sesión con OAuth");
+            const fallback = formId === "signup"
+              ? "No se pudo iniciar el registro con OAuth"
+              : "No se pudo iniciar sesión con OAuth";
+            showError(formId, error.message || fallback);
             button.disabled = false;
           }
         } catch (error) {
-          showError("login", "Error de conexión con OAuth.");
+          showError(formId, "Error de conexión con OAuth.");
           button.disabled = false;
         }
       });
