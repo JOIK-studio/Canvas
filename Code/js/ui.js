@@ -159,6 +159,8 @@
     const overlay = document.createElement("section");
     overlay.id = "globalSystemScreen";
     overlay.setAttribute("role", "alertdialog");
+    overlay.setAttribute("aria-modal", "true");
+    overlay.setAttribute("aria-label", title);
     overlay.style.position = "fixed";
     overlay.style.inset = "0";
     overlay.style.zIndex = "1200";
