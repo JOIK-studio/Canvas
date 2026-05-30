@@ -632,10 +632,11 @@
     const plain = JSON.stringify(packState(state));
     encryptStateString(plain)
       .then((encrypted) => {
-        localStorage.setItem(STORAGE_KEY, encrypted || plain);
+        if (!encrypted) return;
+        localStorage.setItem(STORAGE_KEY, encrypted);
       })
       .catch(() => {
-        localStorage.setItem(STORAGE_KEY, plain);
+        // No guardar estado en claro si falla el cifrado.
       });
     scheduleRemoteSave();
   }
