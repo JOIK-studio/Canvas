@@ -1375,12 +1375,32 @@ body[data-page="open-canvas"] .topbar:focus-within {
 .oc-hud {
   position: absolute;
   z-index: 10;
+  overflow: hidden;
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
   border-radius: 14px;
   border: 1px solid rgba(255, 255, 255, 0.09);
   background: rgba(4, 10, 28, 0.82);
   color: var(--text);
+}
+
+.oc-hud::before {
+  content: "";
+  position: absolute;
+  inset: -55% -20%;
+  background: linear-gradient(
+    120deg,
+    rgba(255, 255, 255, 0) 25%,
+    rgba(255, 255, 255, 0.17) 48%,
+    rgba(255, 255, 255, 0) 72%
+  );
+  pointer-events: none;
+  animation: ocGlassFlow 10s ease-in-out infinite;
+}
+
+.oc-hud > * {
+  position: relative;
+  z-index: 1;
 }
 
 /* top-left: coords + zoom + count */
@@ -1420,8 +1440,9 @@ body[data-page="open-canvas"] .topbar:focus-within {
 
 /* bottom: palette + controls */
 .oc-hud-bottom {
-  bottom: 16px;
+  position: fixed;
   left: 50%;
+  bottom: max(14px, calc(env(safe-area-inset-bottom, 0px) + 8px));
   transform: translateX(-50%);
   padding: 9px 12px;
   display: flex;
@@ -1430,7 +1451,6 @@ body[data-page="open-canvas"] .topbar:focus-within {
   gap: 0;
   max-width: calc(100vw - 32px);
   flex-wrap: nowrap;
-  position: relative;
   min-width: 188px;
 }
 
@@ -1474,7 +1494,7 @@ body[data-page="open-canvas"] .topbar:focus-within {
 .oc-paint-menu {
   position: fixed;
   left: 50%;
-  bottom: 72px;
+  bottom: calc(max(14px, env(safe-area-inset-bottom, 0px) + 8px) + 56px);
   transform: translate(-50%, 8px) scale(0.98);
   width: min(920px, calc(100vw - 32px));
   padding: 10px;
@@ -1486,6 +1506,22 @@ body[data-page="open-canvas"] .topbar:focus-within {
   justify-items: center;
   opacity: 0;
   pointer-events: none;
+}
+
+.oc-paint-menu::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(140deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0) 46%);
+  opacity: 0.35;
+  animation: ocGlassPulse 6s ease-in-out infinite;
+}
+
+.oc-paint-menu > * {
+  position: relative;
+  z-index: 1;
 }
 
 .oc-paint-menu.open {
@@ -1501,6 +1537,48 @@ body[data-page="open-canvas"] .topbar:focus-within {
   100% {
     opacity: 1;
     transform: translate(-50%, 0) scale(1);
+  }
+}
+
+@keyframes ocGlassFlow {
+  0%,
+  100% {
+    transform: translate3d(-12%, -8%, 0) rotate(-8deg);
+    opacity: 0.2;
+  }
+  50% {
+    transform: translate3d(10%, 10%, 0) rotate(-8deg);
+    opacity: 0.38;
+  }
+}
+
+@keyframes ocGlassPulse {
+  0%,
+  100% {
+    opacity: 0.22;
+  }
+  50% {
+    opacity: 0.42;
+  }
+}
+
+@keyframes ocButtonBreathe {
+  0%,
+  100% {
+    transform: translateY(0);
+    box-shadow: 0 0 0 rgba(10, 132, 255, 0.18);
+  }
+  50% {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 20px rgba(10, 132, 255, 0.18);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .oc-hud::before,
+  .oc-paint-menu::after,
+  .oc-paint-btn {
+    animation: none;
   }
 }
 
@@ -1543,7 +1621,8 @@ body[data-page="open-canvas"] .topbar:focus-within {
   white-space: nowrap;
   flex-shrink: 0;
   transition: background var(--transition), border-color var(--transition),
-    box-shadow var(--transition), opacity var(--transition);
+    box-shadow var(--transition), opacity var(--transition), transform var(--transition);
+  animation: ocButtonBreathe 4.5s ease-in-out infinite;
 }
 
 #openPaintBtn {
@@ -3016,7 +3095,7 @@ body.app-loaded .app-hero .cta-row {
   }
 
   .oc-paint-menu {
-    bottom: 74px;
+    bottom: calc(max(14px, env(safe-area-inset-bottom, 0px) + 8px) + 58px);
   }
 
   .gallery-modal-layout {
@@ -3087,7 +3166,7 @@ body.app-loaded .app-hero .cta-row {
 
   .oc-paint-menu {
     width: calc(100vw - 20px);
-    bottom: 70px;
+    bottom: calc(max(12px, env(safe-area-inset-bottom, 0px) + 8px) + 56px);
   }
 
   .oc-palette {
