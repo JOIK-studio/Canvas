@@ -133,7 +133,6 @@
     if (!screen || screen.mode === "off") return;
 
     const isAdmin = Boolean(window.CanvasApp.Store.isCurrentUserAdmin?.());
-    const page = document.body.dataset.page;
     const title = screen.title || (screen.mode === "maintenance" ? "Mantenimiento en curso" : "Aviso global");
     const message = screen.message || "";
 
@@ -159,8 +158,10 @@
     const overlay = document.createElement("section");
     overlay.id = "globalSystemScreen";
     overlay.setAttribute("role", "alertdialog");
-    overlay.setAttribute("aria-modal", "true");
-    overlay.setAttribute("aria-label", title);
+    overlay.setAttribute("aria-modal", "true");
+
+    overlay.setAttribute("aria-label", title);
+
     overlay.style.position = "fixed";
     overlay.style.inset = "0";
     overlay.style.zIndex = "1200";
