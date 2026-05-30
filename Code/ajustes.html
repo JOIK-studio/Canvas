@@ -50,24 +50,59 @@
   </header>
 
   <main class="container">
-    <section class="glass reveal activity-card">
+    <section class="glass reveal activity-card settings-shell">
       <p class="section-kicker">Ajustes</p>
       <h1>Configuración de Canvas</h1>
-      <p class="lead mini">Canvas funciona en modo online con Supabase remoto. La conexión ya viene definida por despliegue.</p>
+      <p class="lead mini">Gestiona tu experiencia por secciones sin exponer información sensible.</p>
 
-      <div class="shortcuts-grid">
-        <article>
-          <h3>Estado de conexión</h3>
-          <p class="mini">Online</p>
-        </article>
-        <article>
-          <h3>Autenticación</h3>
-          <p class="mini">Supabase (correo y OAuth)</p>
-        </article>
+      <div class="settings-tabs" role="tablist" aria-label="Secciones de ajustes">
+        <button class="settings-tab active" type="button" role="tab" aria-selected="true" data-tab-target="generalSettingsPanel">General</button>
+        <button class="settings-tab" type="button" role="tab" aria-selected="false" data-tab-target="privacySettingsPanel">Privacidad</button>
+        <button class="settings-tab" type="button" role="tab" aria-selected="false" data-tab-target="connectionSettingsPanel">Conexión</button>
       </div>
+
+      <section id="generalSettingsPanel" class="settings-panel" role="tabpanel">
+        <h3>Preferencias generales</h3>
+        <label class="settings-toggle">
+          <span>Tema claro</span>
+          <input id="settingsThemeToggle" type="checkbox" />
+        </label>
+        <label class="settings-toggle">
+          <span>Activar modo compacto</span>
+          <input id="settingsCompactToggle" type="checkbox" />
+        </label>
+      </section>
+
+      <section id="privacySettingsPanel" class="settings-panel hidden" role="tabpanel">
+        <h3>Privacidad y visibilidad</h3>
+        <label class="settings-toggle">
+          <span>Mostrar perfil en listados públicos</span>
+          <input id="settingsProfileVisibleToggle" type="checkbox" />
+        </label>
+        <label class="settings-toggle">
+          <span>Permitir mostrar actividad reciente</span>
+          <input id="settingsActivityVisibleToggle" type="checkbox" />
+        </label>
+        <article class="settings-safe-card">
+          <h4>Datos protegidos</h4>
+          <p class="mini">Correo: <strong id="settingsMaskedEmail" aria-label="Correo electrónico enmascarado">No disponible</strong></p>
+          <p class="mini">ID de usuario: <strong id="settingsMaskedUserId" aria-label="Identificador de usuario enmascarado">No disponible</strong></p>
+        </article>
+      </section>
+
+      <section id="connectionSettingsPanel" class="settings-panel hidden" role="tabpanel">
+        <h3>Conexión con base de datos</h3>
+        <article class="settings-safe-card">
+          <p class="mini">Modo: <strong id="settingsConnectionMode">Local</strong></p>
+          <p class="mini">Estado: <strong id="settingsConnectionState">Sin conexión remota</strong></p>
+          <p class="mini">Última sincronización: <strong id="settingsLastSync">Sin datos</strong></p>
+          <p class="mini">Proyecto: <strong id="settingsMaskedProject" aria-label="Proyecto de base de datos enmascarado">No disponible</strong></p>
+        </article>
+      </section>
     </section>
   </main>
 
+  <script src="js/supabase-config.js"></script>
   <script src="js/auth-check.js" type="module"></script>
   <script src="js/user-menu.js"></script>
   <script src="js/state.js" defer></script>

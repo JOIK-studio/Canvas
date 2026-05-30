@@ -263,6 +263,70 @@ body::after {
   backdrop-filter: blur(5px);
 }
 
+.settings-shell {
+  display: grid;
+  gap: 16px;
+}
+
+.settings-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.settings-tab {
+  border: 1px solid var(--line);
+  background: var(--panel-2);
+  color: var(--text);
+  border-radius: 999px;
+  padding: 8px 14px;
+  cursor: pointer;
+}
+
+.settings-tab.active {
+  border-color: var(--line-strong);
+  box-shadow: var(--shadow-neon);
+}
+
+.settings-panel {
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: rgba(7, 14, 40, 0.45);
+}
+
+.settings-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px dashed var(--line);
+}
+
+.settings-toggle:last-child {
+  border-bottom: 0;
+}
+
+.settings-safe-card {
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--panel-2);
+  display: grid;
+  gap: 8px;
+}
+
+body.compact-ui .container {
+  max-width: 1024px;
+}
+
+body.compact-ui .activity-card {
+  padding: 18px;
+}
+
 :root[data-theme="light"] .glass {
   background: linear-gradient(165deg, rgba(255, 255, 255, 0.93), rgba(240, 246, 255, 0.9));
 }

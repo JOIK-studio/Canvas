@@ -5,6 +5,20 @@
   const OPEN_CANVAS_HISTORY_LIMIT = 30;
   const ADMIN_EMAILS = ["jaimegamingpro@gmail.com", "jaimeferrerasg@safa-grial.es"];
   const GRID_SYMBOLS = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-_";
+  const REMOTE_CREATIONS_LIMIT = 120;
+  const LOCAL_CREATIONS_BUFFER = 30;
+  const MAX_REMOTE_ERROR_LENGTH = 180;
+  const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+  let supabaseClientPromise = null;
+  let remoteBootPromise = null;
+  const remoteStatus = {
+    enabled: false,
+    ready: false,
+    lastSyncAt: 0,
+    lastError: "",
+    source: "local"
+  };
 
   function readStoredUser() {
     try {
@@ -31,6 +45,61 @@
 
   function isCurrentUserAdmin() {
     return isAdminEmail(getStoredUserEmail());
+  }
+
+  function isUuid(value) {
+    return UUID_RE.test(String(value || "").trim());
+  }
+
+  function getSupabaseConfig() {
+    if (window.CanvasApp?.SupabaseConfig?.read) {
+      return window.CanvasApp.SupabaseConfig.read();
+    }
+    const url = String(window.CANVAS_SUPABASE_URL || "").trim();
+    const key = String(window.CANVAS_SUPABASE_KEY || "").trim();
+    return { url, key, valid: Boolean(url && key) };
+  }
+
+  function hasRemoteConfig(config) {
+    if (!config?.url || !config?.key) return false;
+    if (window.CanvasApp?.SupabaseConfig?.hasValid) {
+      return window.CanvasApp.SupabaseConfig.hasValid(config.url, config.key);
+    }
+    return true;
+  }
+
+  async function loadSupabaseLibrary() {
+    if (window.supabase?.createClient) return true;
+    await new Promise((resolve, reject) => {
+      const script = document.createElement("script");
+      script.src = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
+      script.onload = resolve;
+      script.onerror = reject;
+      document.head.appendChild(script);
+    });
+    return Boolean(window.supabase?.createClient);
+  }
+
+  async function getSupabaseClient() {
+    if (supabaseClientPromise) return supabaseClientPromise;
+    supabaseClientPromise = (async () => {
+      const config = getSupabaseConfig();
+      if (!hasRemoteConfig(config)) return null;
+      remoteStatus.enabled = true;
+      try {
+        const loaded = await loadSupabaseLibrary();
+        if (!loaded) return null;
+        return window.supabase.createClient(config.url, config.key);
+      } catch {
+        return null;
+      }
+    })();
+    return supabaseClientPromise;
+  }
+
+  function readStoredUserId() {
+    const user = readStoredUser();
+    return user?.id || null;
   }
 
   function nowMs() {
@@ -428,9 +497,160 @@
   }
 
   let state = parseState(localStorage.getItem(STORAGE_KEY));
+  bootRemoteState();
 
   function save() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(packState(state)));
+  }
+
+  function markRemoteSyncOk(source) {
+    remoteStatus.ready = true;
+    remoteStatus.lastSyncAt = nowMs();
+    remoteStatus.lastError = "";
+    remoteStatus.source = source || remoteStatus.source;
+  }
+
+  function markRemoteSyncError(error) {
+    remoteStatus.ready = false;
+    remoteStatus.lastError = String(error?.message || error || "sync_error").slice(0, MAX_REMOTE_ERROR_LENGTH);
+  }
+
+  async function loadRemoteCreations(client) {
+    const { data: rows, error } = await client
+      .from("creations")
+      .select("id,author_id,title,grid,like_count,boost_count,remix_of,created_at")
+      .eq("is_public", true)
+      .order("created_at", { ascending: false })
+      .limit(REMOTE_CREATIONS_LIMIT);
+
+    if (error) throw error;
+    if (!Array.isArray(rows)) return;
+
+    const authorIds = [...new Set(rows.map((entry) => entry.author_id).filter(Boolean))];
+    let authorsById = {};
+    if (authorIds.length) {
+      const { data: profiles, error: profilesError } = await client
+        .from("profiles")
+        .select("id,username")
+        .in("id", authorIds);
+      if (profilesError) throw profilesError;
+      authorsById = Object.fromEntries((profiles || []).map((profile) => [profile.id, profile.username]));
+    }
+
+    const remoteCreations = rows.map((entry) => ({
+      id: entry.id,
+      title: String(entry.title || "Creación").slice(0, 60),
+      author: authorsById[entry.author_id] || "Artista",
+      likes: entry.like_count || 0,
+      boosts: entry.boost_count || 0,
+      comments: [],
+      grid: decodeGrid(entry.grid),
+      remixOf: entry.remix_of || null,
+      createdAt: entry.created_at ? new Date(entry.created_at).getTime() : nowMs()
+    }));
+
+    const existing = state.creations || [];
+    const remoteIds = new Set(remoteCreations.map((entry) => entry.id));
+    const extras = existing.filter((entry) => entry.id && !remoteIds.has(entry.id));
+    state.creations = [...remoteCreations, ...extras].slice(0, REMOTE_CREATIONS_LIMIT + LOCAL_CREATIONS_BUFFER);
+  }
+
+  async function loadRemoteOpenCanvas(client) {
+    const { data, error } = await client
+      .from("open_canvas_pixels")
+      .select("x,y,color,author_name,updated_at");
+    if (error) throw error;
+    if (!Array.isArray(data)) return;
+
+    const pixels = {};
+    const authors = {};
+    data.forEach((entry) => {
+      const x = Number(entry.x);
+      const y = Number(entry.y);
+      if (!Number.isInteger(x) || !Number.isInteger(y)) return;
+      const key = getOpenCanvasPixelKey(x, y);
+      const color = normalizeHexColor(entry.color);
+      if (color === "#ffffff") return;
+      pixels[key] = color;
+      authors[key] = String(entry.author_name || "").slice(0, 32) || "Artista";
+    });
+
+    state.openCanvas.pixels = pixels;
+    state.openCanvas.authors = authors;
+    state.openCanvas.updatedAt = nowMs();
+    pushOpenCanvasHistory("remote_sync", "sync");
+  }
+
+  async function bootRemoteState() {
+    if (remoteBootPromise) return remoteBootPromise;
+    remoteBootPromise = (async () => {
+      const client = await getSupabaseClient();
+      if (!client) return;
+      try {
+        await Promise.all([
+          loadRemoteCreations(client),
+          loadRemoteOpenCanvas(client)
+        ]);
+        save();
+        markRemoteSyncOk("remote");
+      } catch (error) {
+        markRemoteSyncError(error);
+      }
+    })();
+    return remoteBootPromise;
+  }
+
+  async function syncCreationRemote(creation, pixelsUsed) {
+    const client = await getSupabaseClient();
+    const authorId = readStoredUserId();
+    if (!client || !authorId) return;
+    const usedPixels = Number.isFinite(pixelsUsed) ? Math.floor(pixelsUsed) : 0;
+
+    const payload = {
+      author_id: authorId,
+      title: String(creation?.title || "Creación").trim().slice(0, 80),
+      grid: encodeGrid(creation?.grid),
+      pixels_used: Math.max(0, usedPixels),
+      like_count: creation?.likes || 0,
+      boost_count: creation?.boosts || 0,
+      remix_of: isUuid(creation?.remixOf) ? creation.remixOf : null,
+      is_public: true
+    };
+    if (isUuid(creation?.id)) payload.id = creation.id;
+
+    const { error } = await client.from("creations").upsert(payload, { onConflict: "id" });
+    if (error) throw error;
+    markRemoteSyncOk("remote");
+  }
+
+  async function syncOpenCanvasPixelRemote(x, y, color, authorName) {
+    const client = await getSupabaseClient();
+    const userId = readStoredUserId();
+    if (!client || !userId) return;
+
+    if (normalizeHexColor(color) === "#ffffff") {
+      const { error } = await client
+        .from("open_canvas_pixels")
+        .delete()
+        .eq("x", x)
+        .eq("y", y)
+        .eq("author_id", userId);
+      if (error) throw error;
+      markRemoteSyncOk("remote");
+      return;
+    }
+
+    const payload = {
+      x,
+      y,
+      author_id: userId,
+      color: normalizeHexColor(color),
+      author_name: String(authorName || "Artista").trim().slice(0, 32),
+      updated_at: new Date().toISOString()
+    };
+    const { error } = await client.from("open_canvas_pixels").upsert(payload);
+    if (error) throw error;
+    markRemoteSyncOk("remote");
   }
 
   function chargeTick() {
@@ -511,6 +731,7 @@
     pushOpenCanvasHistory("paint", state.user.name);
     addEvent(`${state.user.name} marcó (${x}, ${y}) en Open Canvas.`);
     save();
+    syncOpenCanvasPixelRemote(x, y, safeColor, state.user.name).catch(markRemoteSyncError);
     return { ok: true };
   }
 
@@ -541,7 +762,7 @@
 
     const creation = {
       id: makeId(),
-      title: (payload.title || "Creacion").trim().slice(0, 60),
+      title: (payload.title || "Creación").trim().slice(0, 60),
       author: user.name,
       likes: 0,
       boosts: 0,
@@ -554,6 +775,7 @@
     state.creations.unshift(creation);
     addEvent(`${creation.title} entro al Open Canvas.`);
     save();
+    syncCreationRemote(creation, pixelsUsed).catch(markRemoteSyncError);
     return { ok: true, creation };
   }
 
@@ -891,6 +1113,16 @@
     return clone(state.user.socialLinks);
   }
 
+  function getRemoteStatus() {
+    return {
+      enabled: Boolean(remoteStatus.enabled),
+      ready: Boolean(remoteStatus.ready),
+      source: remoteStatus.source,
+      lastSyncAt: remoteStatus.lastSyncAt || 0,
+      lastError: remoteStatus.lastError || ""
+    };
+  }
+
   function getState() {
     chargeTick();
     state.user.name = getStoredUserName();
@@ -929,6 +1161,7 @@
     compactStorageAdmin,
     getStorageStats,
     getSocialLinks,
+    getRemoteStatus,
     linkSocialAccount,
     unlinkSocialAccount,
     setSocialVisibility,

@@ -80,11 +80,22 @@ create table if not exists public.open_canvas_events (
   created_at timestamptz not null default now()
 );
 
+create table if not exists public.open_canvas_pixels (
+  x integer not null check (x between 0 and 499),
+  y integer not null check (y between 0 and 499),
+  author_id uuid references public.profiles(id) on delete cascade,
+  color text not null default '#ffffff',
+  author_name text not null default 'Artista',
+  updated_at timestamptz not null default now(),
+  primary key (x, y)
+);
+
 create index if not exists idx_creations_created_at on public.creations(created_at desc);
 create index if not exists idx_creations_author on public.creations(author_id);
 create index if not exists idx_comments_creation on public.comments(creation_id, created_at desc);
 create index if not exists idx_open_canvas_events_created_at on public.open_canvas_events(created_at desc);
 create index if not exists idx_creation_views_creation on public.creation_views(creation_id, created_at desc);
+create index if not exists idx_open_canvas_pixels_updated_at on public.open_canvas_pixels(updated_at desc);
 
 create or replace function public.set_updated_at()
 returns trigger
@@ -137,6 +148,7 @@ alter table public.boosts enable row level security;
 alter table public.pixel_shop_orders enable row level security;
 alter table public.open_canvas_events enable row level security;
 alter table public.creation_views enable row level security;
+alter table public.open_canvas_pixels enable row level security;
 
 -- Public read access for public creations/comments/events
 create policy if not exists "read public profiles"
@@ -157,6 +169,10 @@ using (true);
 
 create policy if not exists "read creation views"
 on public.creation_views for select
+using (true);
+
+create policy if not exists "read open canvas pixels"
+on public.open_canvas_pixels for select
 using (true);
 
 -- User ownership policies
@@ -215,6 +231,22 @@ drop policy if exists "users create views" on public.creation_views;
 create policy "users create views"
 on public.creation_views for insert
 with check (auth.uid() = viewer_id);
+
+drop policy if exists "users upsert open canvas pixels" on public.open_canvas_pixels;
+create policy "users upsert open canvas pixels"
+on public.open_canvas_pixels for insert
+with check (auth.uid() = author_id);
+
+drop policy if exists "users update open canvas pixels" on public.open_canvas_pixels;
+create policy "users update open canvas pixels"
+on public.open_canvas_pixels for update
+using (auth.uid() = author_id)
+with check (auth.uid() = author_id);
+
+drop policy if exists "users delete open canvas pixels" on public.open_canvas_pixels;
+create policy "users delete open canvas pixels"
+on public.open_canvas_pixels for delete
+using (auth.uid() = author_id);
 
 -- Recount helper
 create or replace function public.recount_creation_stats(p_creation_id uuid)
