@@ -73,6 +73,9 @@
   }
 
   function getSupabaseConfig() {
+    if (window.CanvasApp?.SupabaseConfig?.read) {
+      return window.CanvasApp.SupabaseConfig.read();
+    }
     const fromWindow = window.CANVAS_SUPABASE_CONFIG || {};
     const urlMeta = document.querySelector('meta[name="supabase-url"]');
     const keyMeta = document.querySelector('meta[name="supabase-key"]');
@@ -83,7 +86,13 @@
 
   function hasValidSupabaseConfig(config) {
     if (!config.url || !config.key) return false;
-    if (config.url.includes("your-project") || config.key.includes("your-public-key")) return false;
+    if (
+      config.url.includes("your-project") ||
+      config.key.includes("your-public-key") ||
+      config.key.includes("your-anon-key")
+    ) {
+      return false;
+    }
     try {
       const parsed = new URL(config.url);
       return /^https?:$/.test(parsed.protocol);
