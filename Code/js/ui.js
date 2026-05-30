@@ -134,7 +134,6 @@
 
     const isAdmin = Boolean(window.CanvasApp.Store.isCurrentUserAdmin?.());
     const page = document.body.dataset.page;
-    const isAdminPanel = page === "admin";
     const title = screen.title || (screen.mode === "maintenance" ? "Mantenimiento en curso" : "Aviso global");
     const message = screen.message || "";
 
