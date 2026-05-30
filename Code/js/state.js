@@ -98,14 +98,18 @@
       if (!window.CanvasApp?.SupabaseConfig?.read) {
         try {
           await loadScriptOnce("js/supabase-config.js");
-        } catch {}
+        } catch (error) {
+          console.warn("No se pudo cargar js/supabase-config.js.", error);
+        }
       }
 
       const initial = getSupabaseConfig();
       if (!initial.valid) {
         try {
           await loadScriptOnce("js/config.js");
-        } catch {}
+        } catch (error) {
+          console.warn("No se pudo cargar js/config.js.", error);
+        }
       }
 
       return getSupabaseConfig();
