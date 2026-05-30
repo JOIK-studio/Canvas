@@ -9,8 +9,23 @@
     }
   }
 
+  function toSafeUser(user) {
+    if (!user || typeof user !== "object") return null;
+    return {
+      id: user.id || null,
+      email: user.email || null,
+      user_metadata: {
+        ...(user.user_metadata && typeof user.user_metadata === "object" ? user.user_metadata : {})
+      },
+      app_metadata: {
+        provider: user.app_metadata?.provider || null,
+        providers: Array.isArray(user.app_metadata?.providers) ? user.app_metadata.providers : []
+      }
+    };
+  }
+
   function writeUser(user) {
-    localStorage.setItem("canvas_user", JSON.stringify(user));
+    localStorage.setItem("canvas_user", JSON.stringify(toSafeUser(user)));
   }
 
   function getDisplayName(user) {
