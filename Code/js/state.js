@@ -3,7 +3,7 @@
   const MAX_CHARGES = 6;
   const OPEN_CANVAS_SIZE = 500;
   const OPEN_CANVAS_HISTORY_LIMIT = 30;
-  const ADMIN_EMAILS = ["jaimegamingpro@gmail.com"];
+  const ADMIN_EMAILS = ["jaimegamingpro@gmail.com", "jaimeferrerasg@safa-grial.es"];
   const GRID_SYMBOLS = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-_";
 
   function readStoredUser() {
@@ -70,6 +70,28 @@
       };
     });
 
+    return base;
+  }
+
+  function defaultSystemScreen() {
+    return {
+      mode: "off",
+      title: "",
+      message: "",
+      updatedAt: 0,
+      updatedBy: ""
+    };
+  }
+
+  function normalizeSystemScreen(value) {
+    const base = defaultSystemScreen();
+    const source = value && typeof value === "object" ? value : {};
+    const mode = String(source.mode || "off").toLowerCase();
+    base.mode = ["off", "maintenance", "notice"].includes(mode) ? mode : "off";
+    base.title = String(source.title || "").trim().slice(0, 80);
+    base.message = String(source.message || "").trim().slice(0, 420);
+    base.updatedAt = Number.isFinite(source.updatedAt) ? source.updatedAt : 0;
+    base.updatedBy = String(source.updatedBy || "").trim().slice(0, 80);
     return base;
   }
 
@@ -250,7 +272,8 @@
       },
       ev: (source.events || []).map((event) => [event.id, event.text, event.ts]),
       lg: source.likesGiven || [],
-      r: source.remixSourceId || null
+      r: source.remixSourceId || null,
+      ss: normalizeSystemScreen(source.systemScreen)
     };
   }
 
@@ -281,7 +304,8 @@
         ? raw.ev.map((event) => ({ id: event[0], text: event[1], ts: event[2] }))
         : [],
       likesGiven: Array.isArray(raw.lg) ? raw.lg : [],
-      remixSourceId: raw.r || null
+      remixSourceId: raw.r || null,
+      systemScreen: normalizeSystemScreen(raw.ss)
     };
   }
 
@@ -325,7 +349,8 @@
         { id: makeId(), text: "Consejo: usa el editor 16x16 y publica cuando tu pieza esté lista para entrar al mural.", ts: createdAt - 1000 }
       ],
       likesGiven: [],
-      remixSourceId: null
+      remixSourceId: null,
+      systemScreen: defaultSystemScreen()
     };
 
     base.openCanvas.history = [
@@ -395,6 +420,7 @@
         ? Math.max(16, Math.min(32, Math.floor(state.user.editorGrid)))
         : 16;
       state.user.socialLinks = normalizeSocialLinks(state.user.socialLinks);
+      state.systemScreen = normalizeSystemScreen(state.systemScreen);
       return state;
     } catch {
       return createDefaultState();
@@ -770,6 +796,43 @@
     return { ok: true, before, after };
   }
 
+  function getSystemScreen() {
+    return clone(normalizeSystemScreen(state.systemScreen));
+  }
+
+  function setSystemScreenAdmin(payload) {
+    if (!isCurrentUserAdmin()) return { ok: false, reason: "unauthorized" };
+    const mode = String(payload?.mode || "off").toLowerCase();
+    if (!["off", "maintenance", "notice"].includes(mode)) {
+      return { ok: false, reason: "invalid_mode" };
+    }
+
+    const title = String(payload?.title || "").trim().slice(0, 80);
+    const message = String(payload?.message || "").trim().slice(0, 420);
+    if (mode !== "off" && !message) return { ok: false, reason: "empty_message" };
+
+    const user = readStoredUser();
+    const actor = (user?.email || state.user?.name || "admin").trim().slice(0, 80);
+
+    state.systemScreen = {
+      mode,
+      title: mode === "off" ? "" : title,
+      message: mode === "off" ? "" : message,
+      updatedAt: nowMs(),
+      updatedBy: actor
+    };
+
+    if (mode === "off") {
+      addEvent("Admin desactivó la pantalla global.");
+    } else if (mode === "maintenance") {
+      addEvent("Admin activó modo mantenimiento global.");
+    } else {
+      addEvent("Admin publicó un aviso global.");
+    }
+    save();
+    return { ok: true, screen: clone(state.systemScreen) };
+  }
+
   function linkSocialAccount(provider, handle) {
     const key = String(provider || "").toLowerCase();
     if (!["google", "discord"].includes(key)) return { ok: false, reason: "invalid_provider" };
@@ -870,6 +933,8 @@
     unlinkSocialAccount,
     setSocialVisibility,
     setSocialHandle,
+    getSystemScreen,
+    setSystemScreenAdmin,
     setRemixSource,
     clearRemixSource,
     getCreationById

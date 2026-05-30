@@ -166,12 +166,59 @@
       renderEvents();
       window.CanvasApp.UI.updateTopStats();
     });
+
+    document.getElementById("adminApplyGlobalScreen")?.addEventListener("click", () => {
+      const mode = String(document.getElementById("adminGlobalMode")?.value || "off");
+      const title = String(document.getElementById("adminGlobalTitle")?.value || "");
+      const message = String(document.getElementById("adminGlobalMessage")?.value || "");
+      const result = window.CanvasApp.Store.setSystemScreenAdmin?.({ mode, title, message });
+      if (!result?.ok) {
+        const status = document.getElementById("adminGlobalScreenStatus");
+        if (status) status.textContent = "No se pudo publicar la pantalla global.";
+        return;
+      }
+      renderGlobalScreenControls();
+      renderEvents();
+    });
+
+    document.getElementById("adminDisableGlobalScreen")?.addEventListener("click", () => {
+      const result = window.CanvasApp.Store.setSystemScreenAdmin?.({ mode: "off" });
+      if (!result?.ok) return;
+      renderGlobalScreenControls();
+      renderEvents();
+    });
+  }
+
+  function renderGlobalScreenControls() {
+    const screen = window.CanvasApp.Store.getSystemScreen?.();
+    if (!screen) return;
+
+    const mode = document.getElementById("adminGlobalMode");
+    const title = document.getElementById("adminGlobalTitle");
+    const message = document.getElementById("adminGlobalMessage");
+    const status = document.getElementById("adminGlobalScreenStatus");
+    if (mode) mode.value = screen.mode || "off";
+    if (title) title.value = screen.title || "";
+    if (message) message.value = screen.message || "";
+
+    if (status) {
+      if (screen.mode === "off") {
+        status.textContent = "Pantalla global desactivada.";
+      } else {
+        const label = screen.mode === "maintenance" ? "Mantenimiento" : "Aviso";
+        const when = screen.updatedAt
+          ? new Date(screen.updatedAt).toLocaleString("es-ES", { hour: "2-digit", minute: "2-digit", day: "2-digit", month: "2-digit" })
+          : "-";
+        status.textContent = `${label} activo · actualizado ${when} por ${screen.updatedBy || "admin"}.`;
+      }
+    }
   }
 
   function init() {
     window.CanvasApp.UI.initCommon();
     if (!ensureAdmin()) return;
     bindActions();
+    renderGlobalScreenControls();
     renderCreations();
     renderStats();
     renderEvents();
