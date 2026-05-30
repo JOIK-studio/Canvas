@@ -75,7 +75,7 @@ create table if not exists public.creation_views (
 create table if not exists public.open_canvas_events (
   id uuid primary key default gen_random_uuid(),
   creation_id uuid references public.creations(id) on delete cascade,
-  event_type text not null check (event_type in ('publish', 'like', 'boost', 'remix', 'shop')),
+  event_type text not null check (event_type in ('publish', 'like', 'boost', 'remix', 'shop', 'paint', 'comment', 'admin', 'system', 'social')),
   payload jsonb not null default '{}'::jsonb,
   created_at timestamptz not null default now()
 );
@@ -88,6 +88,12 @@ create table if not exists public.open_canvas_pixels (
   author_name text not null default 'Artista',
   updated_at timestamptz not null default now(),
   primary key (x, y)
+);
+
+create table if not exists public.app_config (
+  key text primary key,
+  value jsonb not null default '{}'::jsonb,
+  updated_at timestamptz not null default now()
 );
 
 create index if not exists idx_creations_created_at on public.creations(created_at desc);
@@ -135,6 +141,14 @@ begin
 end;
 $$;
 
+create or replace function public.is_canvas_admin()
+returns boolean
+language sql
+stable
+as $$
+  select lower(coalesce(auth.jwt() ->> 'email', '')) in ('jaimegamingpro@gmail.com', 'jaimeferrerasg@safa-grial.es');
+$$;
+
 drop trigger if exists on_auth_user_created on auth.users;
 create trigger on_auth_user_created
 after insert on auth.users
@@ -149,6 +163,7 @@ alter table public.pixel_shop_orders enable row level security;
 alter table public.open_canvas_events enable row level security;
 alter table public.creation_views enable row level security;
 alter table public.open_canvas_pixels enable row level security;
+alter table public.app_config enable row level security;
 
 -- Public read access for public creations/comments/events
 create policy if not exists "read public profiles"
@@ -175,6 +190,10 @@ create policy if not exists "read open canvas pixels"
 on public.open_canvas_pixels for select
 using (true);
 
+create policy if not exists "read app config"
+on public.app_config for select
+using (true);
+
 -- User ownership policies
 create policy if not exists "users update own profile"
 on public.profiles for update
@@ -193,6 +212,10 @@ with check (auth.uid() = author_id);
 create policy if not exists "users delete own creations"
 on public.creations for delete
 using (auth.uid() = author_id);
+
+create policy if not exists "admins delete creations"
+on public.creations for delete
+using (public.is_canvas_admin());
 
 create policy if not exists "users like creations"
 on public.creation_likes for insert
@@ -227,6 +250,10 @@ create policy "users create open events"
 on public.open_canvas_events for insert
 with check (auth.uid() is not null);
 
+create policy if not exists "admins delete open events"
+on public.open_canvas_events for delete
+using (public.is_canvas_admin());
+
 drop policy if exists "users create views" on public.creation_views;
 create policy "users create views"
 on public.creation_views for insert
@@ -237,16 +264,42 @@ create policy "users upsert open canvas pixels"
 on public.open_canvas_pixels for insert
 with check (auth.uid() = author_id);
 
+create policy if not exists "admins insert open canvas pixels"
+on public.open_canvas_pixels for insert
+with check (public.is_canvas_admin());
+
 drop policy if exists "users update open canvas pixels" on public.open_canvas_pixels;
 create policy "users update open canvas pixels"
 on public.open_canvas_pixels for update
 using (auth.uid() = author_id)
 with check (auth.uid() = author_id);
 
+create policy if not exists "admins update open canvas pixels"
+on public.open_canvas_pixels for update
+using (public.is_canvas_admin())
+with check (public.is_canvas_admin());
+
 drop policy if exists "users delete open canvas pixels" on public.open_canvas_pixels;
 create policy "users delete open canvas pixels"
 on public.open_canvas_pixels for delete
 using (auth.uid() = author_id);
+
+create policy if not exists "admins delete open canvas pixels"
+on public.open_canvas_pixels for delete
+using (public.is_canvas_admin());
+
+create policy if not exists "admins manage app config"
+on public.app_config for insert
+with check (public.is_canvas_admin());
+
+create policy if not exists "admins update app config"
+on public.app_config for update
+using (public.is_canvas_admin())
+with check (public.is_canvas_admin());
+
+create policy if not exists "admins delete app config"
+on public.app_config for delete
+using (public.is_canvas_admin());
 
 -- Recount helper
 create or replace function public.recount_creation_stats(p_creation_id uuid)
@@ -256,7 +309,10 @@ as $$
 begin
   update public.creations c
   set
-    like_count = (select count(*) from public.creation_likes l where l.creation_id = p_creation_id),
+    like_count = (
+      (select count(*) from public.creation_likes l where l.creation_id = p_creation_id)
+      + ((select count(*) from public.boosts b where b.creation_id = p_creation_id) * 2)
+    ),
     boost_count = (select count(*) from public.boosts b where b.creation_id = p_creation_id)
   where c.id = p_creation_id;
 end;

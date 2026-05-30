@@ -26,6 +26,12 @@
 function logout() {
   localStorage.removeItem("canvas_user");
   localStorage.removeItem("canvas_app_state_v3");
+  localStorage.removeItem("canvas_ui_settings_v1");
+  localStorage.removeItem("canvas_auth_mode");
+  localStorage.removeItem("canvas_supabase_url");
+  localStorage.removeItem("canvas_supabase_key");
+  localStorage.removeItem("supabase_url");
+  localStorage.removeItem("supabase_anon_key");
   localStorage.removeItem("sb-auth-token");
   window.location.href = "index.html";
 }

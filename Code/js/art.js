@@ -113,8 +113,7 @@
     remix.className = "btn ghost sm";
     remix.textContent = "Remix";
     remix.addEventListener("click", () => {
-      window.CanvasApp.Store.setRemixSource(creation.id);
-      window.location.href = "create.html";
+      window.location.href = `create.html?remix=${encodeURIComponent(creation.id)}`;
     });
 
     actions.append(like, boost, remix);

@@ -1,6 +1,10 @@
 (function () {
-  const SETTINGS_KEY = "canvas_ui_settings_v1";
   const CONNECTION_STATUS_POLL_INTERVAL_MS = 5000;
+  const uiSettings = {
+    compactMode: false,
+    profileVisible: true,
+    activityVisible: true
+  };
 
   function readUser() {
     try {
@@ -11,20 +15,13 @@
   }
 
   function readUiSettings() {
-    try {
-      const raw = JSON.parse(localStorage.getItem(SETTINGS_KEY) || "{}");
-      return {
-        compactMode: Boolean(raw.compactMode),
-        profileVisible: raw.profileVisible !== false,
-        activityVisible: raw.activityVisible !== false
-      };
-    } catch {
-      return { compactMode: false, profileVisible: true, activityVisible: true };
-    }
+    return { ...uiSettings };
   }
 
   function saveUiSettings(next) {
-    localStorage.setItem(SETTINGS_KEY, JSON.stringify(next));
+    uiSettings.compactMode = Boolean(next?.compactMode);
+    uiSettings.profileVisible = next?.profileVisible !== false;
+    uiSettings.activityVisible = next?.activityVisible !== false;
   }
 
   function maskValue(value, start = 3, end = 2) {

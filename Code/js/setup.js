@@ -1,6 +1,4 @@
 (function () {
-  const ONBOARDING_KEY_PREFIX = "canvas_onboarding_done_";
-
   function readUser() {
     try {
       return JSON.parse(localStorage.getItem("canvas_user") || "null");
@@ -15,8 +13,8 @@
 
   function getSupabaseConfig() {
     if (window.CanvasApp?.SupabaseConfig?.read) return window.CanvasApp.SupabaseConfig.read();
-    const url = localStorage.getItem("canvas_supabase_url") || "";
-    const key = localStorage.getItem("canvas_supabase_key") || "";
+    const url = String(window.CANVAS_SUPABASE_URL || "").trim();
+    const key = String(window.CANVAS_SUPABASE_KEY || "").trim();
     return { url, key, valid: Boolean(url && key) };
   }
 
@@ -102,10 +100,6 @@
 
       if (window.CanvasApp?.Store?.setDisplayName) {
         window.CanvasApp.Store.setDisplayName(displayName);
-      }
-
-      if (user.id) {
-        localStorage.setItem(`${ONBOARDING_KEY_PREFIX}${user.id}`, "1");
       }
 
       try {

@@ -19,20 +19,18 @@
 
   function read() {
     const fromWindow = window.CANVAS_SUPABASE_CONFIG || {};
+    const urlMeta = document.querySelector('meta[name="supabase-url"]');
+    const keyMeta = document.querySelector('meta[name="supabase-key"]');
     const url = normalize(
       window.CANVAS_SUPABASE_URL ||
       fromWindow.url ||
-      localStorage.getItem("canvas_supabase_url") ||
-      localStorage.getItem("supabase_url") ||
-      localStorage.getItem("SUPABASE_URL") ||
+      urlMeta?.content ||
       ""
     );
     const key = normalize(
       window.CANVAS_SUPABASE_KEY ||
       fromWindow.key ||
-      localStorage.getItem("canvas_supabase_key") ||
-      localStorage.getItem("supabase_anon_key") ||
-      localStorage.getItem("SUPABASE_ANON_KEY") ||
+      keyMeta?.content ||
       ""
     );
 
@@ -43,8 +41,6 @@
     const nextUrl = normalize(url);
     const nextKey = normalize(key);
 
-    localStorage.setItem("canvas_supabase_url", nextUrl);
-    localStorage.setItem("canvas_supabase_key", nextKey);
     window.CANVAS_SUPABASE_URL = nextUrl;
     window.CANVAS_SUPABASE_KEY = nextKey;
 
