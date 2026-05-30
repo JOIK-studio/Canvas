@@ -22,18 +22,73 @@
   }
 })();
 
+let canvasLogoutInFlight = null;
+
+function readSupabaseRuntimeConfig() {
+  const readConfig = window.CanvasApp?.SupabaseConfig?.read;
+  if (typeof readConfig === "function") {
+    return readConfig();
+  }
+  const url = String(window.CANVAS_SUPABASE_URL || "").trim();
+  const key = String(window.CANVAS_SUPABASE_KEY || "").trim();
+  return { url, key, valid: Boolean(url && key) };
+}
+
+function removeSupabaseSessionKeys() {
+  const removableKeys = [
+    "canvas_user",
+    "canvas_app_state_v3",
+    "canvas_ui_settings_v1",
+    "canvas_auth_mode",
+    "canvas_supabase_url",
+    "canvas_supabase_key",
+    "supabase_url",
+    "supabase_anon_key",
+    "sb-auth-token"
+  ];
+
+  removableKeys.forEach((key) => localStorage.removeItem(key));
+
+  Object.keys(localStorage)
+    .filter((key) => key.startsWith("sb-") && key.endsWith("-auth-token"))
+    .forEach((key) => localStorage.removeItem(key));
+}
+
+async function ensureSupabaseLibrary() {
+  if (window.supabase?.createClient) return true;
+  await new Promise((resolve, reject) => {
+    const script = document.createElement("script");
+    script.src = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
+    script.onload = resolve;
+    script.onerror = reject;
+    document.head.appendChild(script);
+  });
+  return Boolean(window.supabase?.createClient);
+}
+
 // Función para hacer logout
-function logout() {
-  localStorage.removeItem("canvas_user");
-  localStorage.removeItem("canvas_app_state_v3");
-  localStorage.removeItem("canvas_ui_settings_v1");
-  localStorage.removeItem("canvas_auth_mode");
-  localStorage.removeItem("canvas_supabase_url");
-  localStorage.removeItem("canvas_supabase_key");
-  localStorage.removeItem("supabase_url");
-  localStorage.removeItem("supabase_anon_key");
-  localStorage.removeItem("sb-auth-token");
-  window.location.href = "index.html";
+async function logout() {
+  if (canvasLogoutInFlight) return canvasLogoutInFlight;
+
+  canvasLogoutInFlight = (async () => {
+    try {
+      const config = readSupabaseRuntimeConfig();
+      if (config.valid) {
+        const loaded = await ensureSupabaseLibrary();
+        if (loaded) {
+          const client = window.supabase.createClient(config.url, config.key);
+          await client.auth.signOut({ scope: "global" });
+        }
+      }
+    } catch (error) {
+      console.warn("No se pudo cerrar sesión remota de Supabase.", error);
+    } finally {
+      removeSupabaseSessionKeys();
+      window.location.href = "index.html";
+    }
+  })();
+
+  return canvasLogoutInFlight;
 }
 
 // Exponer logout globalmente

@@ -24,6 +24,7 @@
   const SYSTEM_SCREEN_CONFIG_KEY = "system_screen";
 
   let supabaseClientPromise = null;
+  let supabaseConfigPromise = null;
   let remoteBootPromise = null;
   let hadLegacyStoredState = false;
   const remoteStatus = {
@@ -74,6 +75,44 @@
     return { url, key, valid: Boolean(url && key) };
   }
 
+  function loadScriptOnce(src) {
+    const absoluteUrl = new URL(src, window.location.href).toString();
+    const existing = Array.from(document.scripts).find((script) => script.src === absoluteUrl);
+    if (existing) return Promise.resolve(true);
+
+    return new Promise((resolve, reject) => {
+      const script = document.createElement("script");
+      script.src = src;
+      script.onload = () => {
+        script.dataset.loaded = "1";
+        resolve(true);
+      };
+      script.onerror = reject;
+      document.head.appendChild(script);
+    });
+  }
+
+  async function ensureSupabaseConfig() {
+    if (supabaseConfigPromise) return supabaseConfigPromise;
+    supabaseConfigPromise = (async () => {
+      if (!window.CanvasApp?.SupabaseConfig?.read) {
+        try {
+          await loadScriptOnce("js/supabase-config.js");
+        } catch {}
+      }
+
+      const initial = getSupabaseConfig();
+      if (!initial.valid) {
+        try {
+          await loadScriptOnce("js/config.js");
+        } catch {}
+      }
+
+      return getSupabaseConfig();
+    })();
+    return supabaseConfigPromise;
+  }
+
   function hasRemoteConfig(config) {
     if (!config?.url || !config?.key) return false;
     if (window.CanvasApp?.SupabaseConfig?.hasValid) {
@@ -97,7 +136,7 @@
   async function getSupabaseClient() {
     if (supabaseClientPromise) return supabaseClientPromise;
     supabaseClientPromise = (async () => {
-      const config = getSupabaseConfig();
+      const config = await ensureSupabaseConfig();
       if (!hasRemoteConfig(config)) return null;
       remoteStatus.enabled = true;
       try {
