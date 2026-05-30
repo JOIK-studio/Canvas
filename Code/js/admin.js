@@ -1,5 +1,8 @@
 (function () {
   function renderAccessDenied() {
+    document.getElementById("globalSystemScreen")?.remove();
+    document.getElementById("globalSystemScreenBanner")?.remove();
+
     const main = document.querySelector("main.container");
     if (!main) return;
 
