@@ -1,5 +1,11 @@
 # Canvas
 
+> [!IMPORTANT]
+> **Proyecto archivado — agosto de 2026.**
+> Este repositorio ya no recibe mantenimiento: no se aceptan issues ni pull requests y los flujos de trabajo programados (CodeQL) dejaron de ejecutarse.
+> El sitio de GitHub Pages sigue publicado en **https://joik-studio.github.io/Canvas/**, pero la aplicación depende del backend de Supabase (que puede pausarse por inactividad en el plan gratuito).
+> Para exportar o restaurar la base de datos, consulta **[`docs/respaldo-supabase.md`](docs/respaldo-supabase.md)**.
+
 **Canvas** es una plataforma social de pixel art estilo r/Place, donde los usuarios crean piezas de arte en cuadrícula, las publican en una galería compartida y compiten por visibilidad en el **Open Canvas** — un mural colaborativo de 500 × 500 píxeles.
 
 ---
